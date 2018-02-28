@@ -1,0 +1,10 @@
+aniso8601==2.0.1
+click==6.7
+-e git+https://github.com/sbisogni/minifilebox.git@179f65a4d59ca5d6af0a7d90fa235c84172b32aa#egg=file_storage&subdirectory=file_storage
+Flask==0.12.2
+itsdangerous==0.24
+Jinja2==2.10
+MarkupSafe==1.0
+pytz==2018.3
+six==1.11.0
+Werkzeug==0.14.1
