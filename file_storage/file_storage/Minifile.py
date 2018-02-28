@@ -44,3 +44,17 @@ class Minifile:
 
     def set_file_stream(self, stream):
         self.file_stream = stream
+
+    def to_dict(self):
+        result = dict()
+
+        result['file_name'] = self.file_name
+        result['chunk_size'] = self.chunk_size
+
+        if self.file_id:
+            result['file_id'] = self.file_id
+
+        if self.chunk_ids:
+            result['chunks'] = self.chunk_ids
+
+        return result

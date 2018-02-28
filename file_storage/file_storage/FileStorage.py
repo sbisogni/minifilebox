@@ -4,6 +4,7 @@ FileStorage store the file splitting them in chunks
 from tempfile import SpooledTemporaryFile
 from file_storage.ContextStore import ContextStoreMemory
 from file_storage.ObjectStore import ObjectStoreInMemory
+import logging
 
 
 class FileStorage:
@@ -13,8 +14,8 @@ class FileStorage:
 
     # The min chunk size supported by the system
     MIN_CHUNK_SIZE = 1
-    # The max chunk size supported by the system.
-    MAX_CHUNK_SIZE = 100
+    # The max chunk size supported by the system. 100MB
+    MAX_CHUNK_SIZE = 100000000
 
     def __init__(self, context_store, object_store):
         """
@@ -35,10 +36,16 @@ class FileStorage:
         :param minifile: Minifile holding the information of the file to store. Once the file is stored further
                             metadata are added to the structure
         """
+        logging.info('saving file_name = %s, chunk_size = %s' % (minifile.get_file_name(), minifile.get_chunk_size()))
         self._save(minifile)
+
+        logging.info('saving in context store minifile = %s' % minifile.to_dict())
         self._context_store.save(minifile)
+
         if not minifile.get_file_id():
             raise RuntimeError("No unique id generated for file: %s", minifile.get_file_name())
+
+        logging.info('file storage save done - file_name = %s, file_id = %s' % (minifile.get_file_name(), minifile.get_file_id()))
 
     def load(self, file_id):
         """

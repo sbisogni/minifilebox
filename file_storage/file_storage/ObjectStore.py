@@ -1,6 +1,7 @@
 """
 Different implementation of the ContextStore to be used in different execution environment
 """
+import logging
 
 
 class ObjectStoreInMemory:
@@ -11,13 +12,16 @@ class ObjectStoreInMemory:
 
     def save(self, obj):
         id = self._generate_unique_id()
+        logging.info("storing object with id = %s" % id)
         self._memory_db[id] = obj
         return id
 
     def load(self, obj_id):
+        logging.info("loading object with id = %s" % obj_id)
         return self._memory_db[obj_id]
 
     def delete(self, obj_id):
+        logging.info("deleting object with id = %s" % obj_id)
         obj = self.load(obj_id)
         self._memory_db.pop(obj_id)
         return obj
