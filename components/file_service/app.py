@@ -162,4 +162,4 @@ if __name__ == '__main__':
     # Overriding default HTML exception handler
     for ex in default_exceptions:
         app.register_error_handler(ex, handle_error)
-    app.run(debug=True)
+    app.run(host='0.0.0.0')
