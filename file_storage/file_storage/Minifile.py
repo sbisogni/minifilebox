@@ -3,7 +3,7 @@ Data structure encode file metadata information
 """
 
 
-class MiniboxFile:
+class Minifile:
 
     def __init__(self, file_name, chunk_size):
         """

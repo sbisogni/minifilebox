@@ -8,10 +8,10 @@ class ContextStoreInterface:
     The ContextStore interface
     """
 
-    def save(self, miniboxfile):
+    def save(self, minifile):
         """
-        Save the metadata inside the given MiniboxFile in the ContextStore. A unique file id is assigned
-        :param miniboxfile: The file metadata to store in the context. At the end of execution, a unique file id is assigned
+        Save the metadata inside the given Minifile in the ContextStore. A unique file id is assigned
+        :param minifile: The file metadata to store in the context. At the end of execution, a unique file id is assigned
         :return Unique file id
         """
         pass
@@ -20,7 +20,7 @@ class ContextStoreInterface:
         """
         Load the metadata associated to the given id
         :param file_id: The unique file id
-        :return: MiniboxFile holding the information of the file
+        :return: Minifile holding the information of the file
         """
         pass
 
@@ -28,12 +28,12 @@ class ContextStoreInterface:
         """
         Delete the metadata of the given file id
         :param file_id: The id of the file to delete
-        :return: MiniboxFile holding the information of the deleted file
+        :return: Minifile holding the information of the deleted file
         """
     def list(self):
         """
         Returns information about all the file store in the FileStorage
-        :return: List[MiniboxFile]
+        :return: List[Minifile]
         """
         pass
 

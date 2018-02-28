@@ -8,6 +8,5 @@ setup(
     author='Simone Bisogni',
     author_email='simone.bisogni@yahoo.it',
     python_requires='>=3',
-    install_requirement=[],
-    packagages=find_packages(),
+    packages=find_packages(),
 )

@@ -3,7 +3,7 @@ from unittest.mock import Mock, call
 from io import BytesIO
 
 from file_storage.FileStorage import FileStorage
-from file_storage.MiniboxFile import MiniboxFile
+from file_storage.Minifile import Minifile
 
 
 class FileStorageTestCase(unittest.TestCase):
@@ -19,7 +19,7 @@ class FileStorageTestCase(unittest.TestCase):
             pass
 
         self.storage._save = disable_internal_save
-        mbf = MiniboxFile("file", 1)
+        mbf = Minifile("file", 1)
 
         self.assertRaises(RuntimeError, self.storage.save, mbf)
 
@@ -29,7 +29,7 @@ class FileStorageTestCase(unittest.TestCase):
             pass
 
         self.storage._save = disable_internal_save
-        mbf = MiniboxFile("file", 1)
+        mbf = Minifile("file", 1)
         self.context_store_mock.save.side_effect = mbf.set_file_id("id")
 
         self.storage.save(mbf)
@@ -48,14 +48,14 @@ class FileStorageTestCase(unittest.TestCase):
 
         self.context_store_mock.load.assert_has_calls([call(exp_id)])
 
-    def testLoadReturnsMiniboxFileOfLoadedFile(self):
+    def testLoadReturnsMinifileOfLoadedFile(self):
         # We disable the internal _load function as we are not interested for this test
         def disable_internal_load(any):
             pass
 
         exp_id = "id"
         self.storage._load = disable_internal_load
-        exp_mbf = MiniboxFile("file", 1)
+        exp_mbf = Minifile("file", 1)
         self.context_store_mock.load.return_value = exp_mbf
 
         act_mbf = self.storage.load(exp_id)
@@ -86,14 +86,14 @@ class FileStorageTestCase(unittest.TestCase):
 
         self.context_store_mock.delete.assert_has_calls([call(exp_id)])
 
-    def testDeleteReturnsMiniboxFileOfDeletedFile(self):
+    def testDeleteReturnsMinifileOfDeletedFile(self):
         # We disable the internal _delete function as we are not interested for this test
         def disable_internal_delete(any):
             pass
 
         exp_id = "id"
         self.storage._delete = disable_internal_delete
-        exp_mbf = MiniboxFile("file", 1)
+        exp_mbf = Minifile("file", 1)
         self.context_store_mock.delete.return_value = exp_mbf
 
         act_mbf = self.storage.delete(exp_id)
@@ -105,7 +105,7 @@ class FileStorageTestCase(unittest.TestCase):
         self.context_store_mock.list.assert_called()
 
     def testListReturnsListOfFiles(self):
-        exp_result = [MiniboxFile("file", 1), MiniboxFile("file", 1)]
+        exp_result = [Minifile("file", 1), Minifile("file", 1)]
         self.context_store_mock.list.return_value = exp_result
 
         act_result = self.storage.list()
@@ -114,13 +114,13 @@ class FileStorageTestCase(unittest.TestCase):
 
     # VALIDATION INTERNAL SAVE METHOD
     def testSaveThrowValueErrorIfChunkSizeLessThanMinChunkSize(self):
-        self.assertRaises(ValueError, self.storage._save, MiniboxFile("file.txt", FileStorage.MIN_CHUNK_SIZE - 1))
+        self.assertRaises(ValueError, self.storage._save, Minifile("file.txt", FileStorage.MIN_CHUNK_SIZE - 1))
 
     def testSaveThrowValueErrorIfChunkSizeGreaterThanMaxChunkSize(self):
-        self.assertRaises(ValueError, self.storage._save, MiniboxFile("file.txt", FileStorage.MAX_CHUNK_SIZE + 1))
+        self.assertRaises(ValueError, self.storage._save, Minifile("file.txt", FileStorage.MAX_CHUNK_SIZE + 1))
 
     def testSaveGeneratesNoChunksIfStreamIsEmpty(self):
-        mbf = MiniboxFile("file.txt", 1)
+        mbf = Minifile("file.txt", 1)
         mbf.set_file_stream(BytesIO())
 
         self.storage._save(mbf)
@@ -128,7 +128,7 @@ class FileStorageTestCase(unittest.TestCase):
         self.assertTrue(len(mbf.get_chunk_ids()) == 0)
 
     def testSavesSplitsStreamInTenChunks(self):
-        mbf = MiniboxFile("file.txt",1)
+        mbf = Minifile("file.txt", 1)
         mbf.set_file_stream(BytesIO('1234567890'.encode()))
 
         self.storage._save(mbf)
@@ -136,7 +136,7 @@ class FileStorageTestCase(unittest.TestCase):
         self.assertTrue(len(mbf.get_chunk_ids()) == 10)
 
     def testSavesSplitsStreamInFiveChunks(self):
-        mbf = MiniboxFile("file.txt", 2)
+        mbf = Minifile("file.txt", 2)
         mbf.set_file_stream(BytesIO('1234567890'.encode()))
 
         self.storage._save(mbf)
@@ -144,7 +144,7 @@ class FileStorageTestCase(unittest.TestCase):
         self.assertTrue(len(mbf.get_chunk_ids()) == 5)
 
     def testSaveCallesObjectStoreForEachChunk(self):
-        mbf = MiniboxFile("file.txt", 1)
+        mbf = Minifile("file.txt", 1)
         mbf.set_file_stream(BytesIO('12345'.encode()))
 
         self.storage._save(mbf)
@@ -152,7 +152,7 @@ class FileStorageTestCase(unittest.TestCase):
         self.object_store_mock.save.assert_has_calls([call(b'1'), call(b'2'), call(b'3'), call(b'4'), call(b'5')])
 
     def testSaveNoCallsObjectStoreIfStreamIsEmpty(self):
-        mbf = MiniboxFile("file.txt", 1)
+        mbf = Minifile("file.txt", 1)
         mbf.set_file_stream(BytesIO())
 
         self.storage._save(mbf)
@@ -162,11 +162,11 @@ class FileStorageTestCase(unittest.TestCase):
     # VALIDATION INTERNAL LOAD METHOD
 
     def testLoadThrowsValueErrorIsFileMetadataHasNoChunks(self):
-        mbf = MiniboxFile("file.txt", 0)
+        mbf = Minifile("file.txt", 0)
         self.assertRaises(ValueError, self.storage._load, mbf)
 
     def testLoadCallsObjectStoreForEachChunk(self):
-        mbf = MiniboxFile("file.txt", 1)
+        mbf = Minifile("file.txt", 1)
         mbf.add_chunk_id(1)
         mbf.add_chunk_id(2)
         mbf.add_chunk_id(3)
@@ -179,7 +179,7 @@ class FileStorageTestCase(unittest.TestCase):
         self.object_store_mock.load.assert_has_calls([call(1), call(2), call(3), call(4), call(5)])
 
     def testLoadThrowsIOErrorIfChunkCannotBeFound(self):
-        metadata = MiniboxFile("file.txt", 0)
+        metadata = Minifile("file.txt", 0)
         metadata.add_chunk_id(1)
         metadata.add_chunk_id(2)
 
@@ -190,7 +190,7 @@ class FileStorageTestCase(unittest.TestCase):
         exp_stream = BytesIO('12345'.encode())
         chunk_size = 1
 
-        mbf = MiniboxFile("file.txt", chunk_size)
+        mbf = Minifile("file.txt", chunk_size)
         mbf.set_file_stream(exp_stream)
         mbf.add_chunk_id(1)
         mbf.add_chunk_id(2)
@@ -212,11 +212,11 @@ class FileStorageTestCase(unittest.TestCase):
     # VALIDATION INTERNAL DELETE METHOD
 
     def testDeleteThrowsValueErrorIfFileMetadataHasNoChunks(self):
-        mbf = MiniboxFile("file.txt", 0)
+        mbf = Minifile("file.txt", 0)
         self.assertRaises(ValueError, self.storage._delete, mbf)
 
     def testDeleteCallsObjectStoreDeleteForEachChunkId(self):
-        mbf = MiniboxFile("file.txt", 0)
+        mbf = Minifile("file.txt", 0)
         mbf.add_chunk_id(1)
         mbf.add_chunk_id(2)
         mbf.add_chunk_id(3)
@@ -226,7 +226,7 @@ class FileStorageTestCase(unittest.TestCase):
         self.object_store_mock.delete.assert_has_calls(calls)
 
     def testDeleteThrowsIoErrorIfChunkNotFound(self):
-        metadata = MiniboxFile("file.txt", 0)
+        metadata = Minifile("file.txt", 0)
         metadata.add_chunk_id(1)
 
         def delete_raise_io_error(id):

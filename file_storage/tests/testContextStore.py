@@ -1,6 +1,6 @@
 import unittest
 from file_storage.ContextStore import ContextStoreMemory
-from file_storage.MiniboxFile import MiniboxFile
+from file_storage.Minifile import Minifile
 
 class ContextStoreMemoryTestCase(unittest.TestCase):
 
@@ -8,22 +8,22 @@ class ContextStoreMemoryTestCase(unittest.TestCase):
         self.context_store = ContextStoreMemory()
 
     def testSaveGeneratesUniqueId(self):
-        mbf = MiniboxFile("file.txt", 1)
+        mbf = Minifile("file.txt", 1)
         id = self.context_store.save(mbf)
 
         self.assertTrue(mbf.get_file_id())
         self.assertEqual(id, mbf.get_file_id())
 
-    def testLoadRetrieveMiniboxFileById(self):
-        exp_mbf = MiniboxFile("file.txt", 1)
+    def testLoadRetrieveMinifileById(self):
+        exp_mbf = Minifile("file.txt", 1)
 
         self.context_store.save(exp_mbf)
         act_mbf = self.context_store.load(exp_mbf.get_file_id())
 
         self.assertEqual(exp_mbf, act_mbf)
 
-    def testDeleteErasesMiniboxFileById(self):
-        mbf = MiniboxFile("file.txt", 1)
+    def testDeleteErasesMinifileById(self):
+        mbf = Minifile("file.txt", 1)
 
         id = self.context_store.save(mbf)
         self.context_store.load(id)
@@ -31,8 +31,8 @@ class ContextStoreMemoryTestCase(unittest.TestCase):
 
         self.assertRaises(KeyError, self.context_store.load, id)
 
-    def testDeleteReturnsErasedMiniboxFile(self):
-        exp_mbf = MiniboxFile("file.txt", 1)
+    def testDeleteReturnsErasedMinifile(self):
+        exp_mbf = Minifile("file.txt", 1)
 
         id = self.context_store.save(exp_mbf)
         act_mbf = self.context_store.delete(id)
@@ -40,7 +40,7 @@ class ContextStoreMemoryTestCase(unittest.TestCase):
         self.assertEqual(exp_mbf, act_mbf)
 
     def testListIsReturningAllFiles(self):
-        exp_list = [MiniboxFile("file", 1), MiniboxFile("file", 1), MiniboxFile("file", 1)]
+        exp_list = [Minifile("file", 1), Minifile("file", 1), Minifile("file", 1)]
 
         for mbf in exp_list:
             self.context_store.save(mbf)
