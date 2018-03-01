@@ -58,7 +58,7 @@ def download_file(file_id):
     """
     Download the file with given id
         curl -X GET http://<host:port>/minifilebox/api/v1/files/download/<file_id> \
-            -H 'cache-control: no-cache' \
+            -H 'cache-control: no-cache'
 
     :param file_id:
     :return: The file in mimetype='application/octet-stream'
@@ -110,7 +110,7 @@ def list_files():
     """
     List all the files inside the Minifilebox
         curl -X GET http://<host:port>/minifilebox/api/v1/files
-            -H 'cache-control: no-cache' \
+            -H 'cache-control: no-cache' 
 
     :return: The list of files metadata
         [

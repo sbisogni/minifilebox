@@ -2,8 +2,8 @@
 FileStorage store the file splitting them in chunks
 """
 from tempfile import SpooledTemporaryFile
-from file_storage.ContextStore import ContextStoreMemory
-from file_storage.ObjectStore import ObjectStoreInMemory
+from file_storage.ContextStoreInMemory import ContextStoreMemory
+from file_storage.ObjectStoreInMemory import ObjectStoreInMemory
 import logging
 
 

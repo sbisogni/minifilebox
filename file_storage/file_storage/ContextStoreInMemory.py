@@ -1,12 +1,9 @@
 """
-Different implementation of the ContextStore to be used in different execution environment
+In-memory implementation of ContextStore. Aimed for testing
 """
 
 
 class ContextStoreMemory:
-    """
-    In-memory implementation of ContextStore. Aimed for testing
-    """
 
     def __init__(self):
         self._memory_db = {}

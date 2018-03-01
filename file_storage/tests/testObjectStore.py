@@ -1,5 +1,5 @@
 import unittest
-from file_storage.ObjectStore import ObjectStoreInMemory
+from file_storage.ObjectStoreInMemory import ObjectStoreInMemory
 
 
 class ObjectStoreInMemoryTestCase(unittest.TestCase):

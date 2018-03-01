@@ -1,5 +1,5 @@
 import unittest
-from file_storage.ContextStore import ContextStoreMemory
+from file_storage.ContextStoreInMemory import ContextStoreMemory
 from file_storage.Minifile import Minifile
 
 class ContextStoreMemoryTestCase(unittest.TestCase):

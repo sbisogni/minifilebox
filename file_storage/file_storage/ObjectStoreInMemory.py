@@ -1,5 +1,5 @@
 """
-Different implementation of the ContextStore to be used in different execution environment
+In-Memory implementation of the ObjectStore. Aimed for testing
 """
 import logging
 
