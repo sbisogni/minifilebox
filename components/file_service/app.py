@@ -110,7 +110,7 @@ def list_files():
     """
     List all the files inside the Minifilebox
         curl -X GET http://<host:port>/minifilebox/api/v1/files
-            -H 'cache-control: no-cache' 
+            -H 'cache-control: no-cache'
 
     :return: The list of files metadata
         [
