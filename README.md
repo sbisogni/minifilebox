@@ -48,7 +48,7 @@ Minifilebox exports REST endpoints to perform operations
 # Deployment
 
 * Requirements
-  * Docker: the applications in Dockers
+  * docker: https://www.docker.com/
   
 * How To Run
 
