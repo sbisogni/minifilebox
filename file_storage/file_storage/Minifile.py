@@ -1,5 +1,5 @@
 """
-Data structure encode file metadata information
+Representation of a file inside Minifilebox
 """
 
 
@@ -7,7 +7,7 @@ class Minifile:
 
     def __init__(self, file_name, chunk_size):
         """
-        Generate a new Metadata object
+        Representation of a file metadata inside Minifilebox. All file metadata information to operate on the file
 
         :param file_name: the filename to which the metadata is associated to
         :param chunk_size: the size of the file's chunks

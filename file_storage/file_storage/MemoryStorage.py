@@ -46,16 +46,16 @@ class ObjectStoreInMemory:
         self._memory_db = {}
         self._unique_id = 0
 
-    def save(self, obj_id, obj):
-        logging.info("storing object with id = %s" % obj_id)
-        self._memory_db[obj_id] = obj
+    def save(self, key, obj):
+        logging.info("storing object with id = %s" % key)
+        self._memory_db[key] = obj
 
-    def load(self, obj_id):
-        logging.info("loading object with id = %s" % obj_id)
-        return self._memory_db[obj_id]
+    def load(self, key):
+        logging.info("loading object with id = %s" % key)
+        return self._memory_db[key]
 
-    def delete(self, obj_id):
-        logging.info("deleting object with id = %s" % obj_id)
-        obj = self.load(obj_id)
-        self._memory_db.pop(obj_id)
+    def delete(self, key):
+        logging.info("deleting object with id = %s" % key)
+        obj = self.load(key)
+        self._memory_db.pop(key)
         return obj

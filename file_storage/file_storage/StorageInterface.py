@@ -45,30 +45,30 @@ class ObjectStoreInterface:
     The ObjectStore interface
     """
     
-    def save(self, obj_id, obj):
+    def save(self, key, value):
         """
         Store the given (key, object) in the store
 
-        :param obj_id: the object unique id
-        :param obj: the obj to store
-        :return: Unique obj id
+        :param key: unique key
+        :param value: the object to store
         """
         pass
 
-    def load(self, obj_id):
+    def load(self, key):
         """
-        Return the object identified by the given obj_id
+        Return the object identified by the given key
 
-        :param obj_id: unique object id
-        :return: the object, None if not found
+        :param key: unique object key
+        :return: KeyValue
+        :except KeyError if key cannot be found
         """
         pass
 
-    def delete(self, obj_id):
+    def delete(self, key):
         """
-        Delete the object with the given object id
+        Delete the object with the given object key
 
-        :param obj_id: unique object id
-        :except IOError if object cannot be deleted
+        :param key: unique object key
+        :except KeyError if object cannot be found
         """
         pass

@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock, call
 from io import BytesIO
 
-from file_storage.FileStorage import FileStorage, generate_uuid_of, create_test_file_storage
+from file_storage.FileStorage import FileStorage, create_test_file_storage
 from file_storage.Minifile import Minifile
 
 
@@ -135,7 +135,7 @@ class FileStorageTestCase(unittest.TestCase):
 
     def testSaveCallsObjectStoreForEachChunk(self):
 
-        FileStorage.GENERATE_OBJECT_ID = lambda x: x
+        FileStorage.generate_object_id = lambda x: x
 
         mbf = Minifile("file.txt", 1)
         mbf.set_file_stream(BytesIO('12345'.encode()))
@@ -233,12 +233,12 @@ class FileStorageTestCase(unittest.TestCase):
         self.assertRaises(IOError, self.storage._delete, metadata)
 
     def testIsUniqueIdGenerated(self):
-        self.assertTrue(generate_uuid_of("any"))
+        self.assertTrue(FileStorage.generate_uuid_of("any"))
 
     def testAreIdsUnique(self):
         ids = []
         for x in range(10000):
-            ids.append(x)
+            ids.append(FileStorage.generate_uuid_of("any"))
 
         seen = set()
         unique = [x for x in ids if x not in seen and not seen.add(x)]

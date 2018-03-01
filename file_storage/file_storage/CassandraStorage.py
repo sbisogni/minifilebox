@@ -2,18 +2,17 @@
 implementation of the Storage interfaces with Cassandra DB
 """
 
-
 class ObjectStoreCassandra:
 
     def __init__(self):
 
-    def save(self, obj):
+    def save(self, key, value):
         pass
 
-    def load(self, obj_id):
+    def load(self, key):
         pass
 
-    def delete(self, obj_id):
+    def delete(self, key):
         pass
 
 

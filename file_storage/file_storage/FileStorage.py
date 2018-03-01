@@ -2,18 +2,10 @@
 FileStorage store the file splitting them in chunks
 """
 
-from file_storage.MemoryStorage import ContextStoreMemory, ObjectStoreInMemory
-from tempfile import SpooledTemporaryFile
-import uuid, logging
-
-
-def generate_uuid_of(value):
-    """
-    Generates unique random uuid
-    :param value: not used
-    :return: the unique id
-    """
-    return uuid.uuid4()
+import tempfile
+import uuid
+import logging
+from file_storage import MemoryStorage
 
 
 class FileStorage:
@@ -21,13 +13,24 @@ class FileStorage:
     Provide operations to manipulate files inside the FileStorage
     """
 
-    GENERATE_OBJECT_ID = generate_uuid_of
-    GENERATE_FILE_ID = generate_uuid_of
-
     # The min chunk size supported by the system
     MIN_CHUNK_SIZE = 1
     # The max chunk size supported by the system. 100MB
     MAX_CHUNK_SIZE = 100000000
+
+    @staticmethod
+    def generate_uuid_of(value):
+        """
+        Generates unique random uuid
+        :param value: not used
+        :return: the unique id
+        """
+        return uuid.uuid4()
+
+    # Called by FileStorage to generate object id
+    generate_object_id = generate_uuid_of
+    # Called by FileStorage to generate file id
+    generate_file_id = generate_uuid_of
 
     def __init__(self, context_store, object_store):
         """
@@ -50,7 +53,7 @@ class FileStorage:
         """
         logging.info('saving file_name = %s, chunk_size = %s' % (minifile.get_file_name(), minifile.get_chunk_size()))
         # Generate the unique file id
-        minifile.set_file_id(FileStorage.GENERATE_FILE_ID(minifile))
+        minifile.set_file_id(FileStorage.generate_file_id(minifile))
         self._save(minifile)
 
         logging.info('saving in context store minifile = %s' % minifile.to_dict())
@@ -100,7 +103,7 @@ class FileStorage:
         while not done:
             chunk = file_stream.read(chunk_size)
             if len(chunk) is not 0:
-                obj_id = FileStorage.GENERATE_OBJECT_ID(chunk)
+                obj_id = FileStorage.generate_object_id(chunk)
                 self._object_store.save(obj_id, chunk)
                 minifile.add_chunk_id(obj_id)
             else:
@@ -117,7 +120,7 @@ class FileStorage:
                 raise IOError("No chunk found for id = %s", id)
             # We have at least one good chunk we create the tmp file
             if not tmp_file:
-                tmp_file = SpooledTemporaryFile()
+                tmp_file = tempfile.SpooledTemporaryFile()
 
             tmp_file.write(chunk)
 
@@ -137,4 +140,5 @@ def create_test_file_storage():
     Creates a new FileStorage with in-memory ContextStore and ObjectStore. This is aimed for testing
     :return: FileStorage
     """
-    return FileStorage(ContextStoreMemory(), ObjectStoreInMemory())
+    return FileStorage(MemoryStorage.ContextStoreMemory(),
+                       MemoryStorage.ObjectStoreInMemory())
