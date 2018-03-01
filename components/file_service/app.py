@@ -7,10 +7,16 @@ import config
 
 
 app = Flask(__name__)
-FILE_STORAGE = FileStorage.create_test_file_storage()
+
+file_storage_factory = {
+    'cassandra': FileStorage.create_cassandra_file_storage,
+    'memory': FileStorage.create_memory_file_storage()
+}
+
+file_storage = file_storage_factory[config.MINIFILEBOX_STORAGE_TYPE]
 
 
-@app.route(config.DEFAULT_BASE_URI + '/files/upload', methods=['POST'])
+@app.route(config.MINIFILEBOX_BASE_URI + '/files/upload', methods=['POST'])
 def upload_file():
     """
     Upload a file inside the Minifilebox FileStorage.
@@ -44,16 +50,16 @@ def upload_file():
 
     file = request.files['file']
 
-    chunk_size = config.DEFAULT_CHUNK_SIZE
+    chunk_size = config.MINIFILEBOX_CHUNK_SIZE
 
     minifile = Minifile.Minifile(file.filename, chunk_size)
     minifile.set_file_stream(file.stream)
-    FILE_STORAGE.save(minifile)
+    file_storage.save(minifile)
 
     return jsonify(minifile.to_dict()), 200
 
 
-@app.route(config.DEFAULT_BASE_URI + '/files/download/<int:file_id>', methods=['GET'])
+@app.route(config.MINIFILEBOX_BASE_URI + '/files/download/<int:file_id>', methods=['GET'])
 def download_file(file_id):
     """
     Download the file with given id
@@ -64,7 +70,7 @@ def download_file(file_id):
     :return: The file in mimetype='application/octet-stream'
     """
     try:
-        minifile = FILE_STORAGE.load(file_id)
+        minifile = file_storage.load(file_id)
         return send_file(minifile.get_file_stream(),
                          attachment_filename=minifile.get_file_name(),
                          as_attachment=True,
@@ -73,7 +79,7 @@ def download_file(file_id):
         raise NotFound(str(e))
 
 
-@app.route(config.DEFAULT_BASE_URI + '/files/delete/<int:file_id>', methods=['DELETE'])
+@app.route(config.MINIFILEBOX_BASE_URI + '/files/delete/<int:file_id>', methods=['DELETE'])
 def delete_file(file_id):
     """
     Delete the file with given id
@@ -99,13 +105,13 @@ def delete_file(file_id):
         }
     """
     try:
-        minifile = FILE_STORAGE.delete(file_id)
+        minifile = file_storage.delete(file_id)
         return jsonify(minifile.to_dict()), 200
     except KeyError as e:
         raise NotFound(str(e))
 
 
-@app.route(config.DEFAULT_BASE_URI + '/files', methods=['GET'])
+@app.route(config.MINIFILEBOX_BASE_URI + '/files', methods=['GET'])
 def list_files():
     """
     List all the files inside the Minifilebox
@@ -146,7 +152,7 @@ def list_files():
             }
         ]
     """
-    minifile_list = FILE_STORAGE.list()
+    minifile_list = file_storage.list()
     return jsonify([m.to_dict() for m in minifile_list]), 200
 
 
