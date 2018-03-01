@@ -51,6 +51,8 @@ Minifilebox exports REST endpoints to perform operations
   * Docker: the applications in Dockers
   
 * How To Run
-  * Clone the repository git clone https://github.com/sbisogni/minifilebox.git
-  * Run the run_all.sh script
+
+        git clone https://github.com/sbisogni/minifilebox.git
+        cd minifilebox
+        /bin/sh run_all.sh script
 
