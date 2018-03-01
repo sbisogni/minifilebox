@@ -54,5 +54,5 @@ Minifilebox exports REST endpoints to perform operations
 
         git clone https://github.com/sbisogni/minifilebox.git
         cd minifilebox
-        /bin/sh run_all.sh script
+        /bin/sh run_all.sh
 
