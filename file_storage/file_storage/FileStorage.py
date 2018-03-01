@@ -1,16 +1,28 @@
 """
 FileStorage store the file splitting them in chunks
 """
-from tempfile import SpooledTemporaryFile
-from file_storage.MemoryStorage import ContextStoreMemory, ObjectStoreInMemory
 
-import logging
+from file_storage.MemoryStorage import ContextStoreMemory, ObjectStoreInMemory
+from tempfile import SpooledTemporaryFile
+import uuid, logging
+
+
+def generate_uuid_of(value):
+    """
+    Generates unique random uuid
+    :param value: not used
+    :return: the unique id
+    """
+    return uuid.uuid4()
 
 
 class FileStorage:
     """
     Provide operations to manipulate files inside the FileStorage
     """
+
+    GENERATE_OBJECT_ID = generate_uuid_of
+    GENERATE_FILE_ID = generate_uuid_of
 
     # The min chunk size supported by the system
     MIN_CHUNK_SIZE = 1
@@ -37,13 +49,12 @@ class FileStorage:
                             metadata are added to the structure
         """
         logging.info('saving file_name = %s, chunk_size = %s' % (minifile.get_file_name(), minifile.get_chunk_size()))
+        # Generate the unique file id
+        minifile.set_file_id(FileStorage.GENERATE_FILE_ID(minifile))
         self._save(minifile)
 
         logging.info('saving in context store minifile = %s' % minifile.to_dict())
         self._context_store.save(minifile)
-
-        if not minifile.get_file_id():
-            raise RuntimeError("No unique id generated for file: %s", minifile.get_file_name())
 
         logging.info('file storage save done - file_name = %s, file_id = %s' % (minifile.get_file_name(), minifile.get_file_id()))
 
@@ -89,7 +100,9 @@ class FileStorage:
         while not done:
             chunk = file_stream.read(chunk_size)
             if len(chunk) is not 0:
-                minifile.add_chunk_id(self._object_store.save(chunk))
+                obj_id = FileStorage.GENERATE_OBJECT_ID(chunk)
+                self._object_store.save(obj_id, chunk)
+                minifile.add_chunk_id(obj_id)
             else:
                 done = True
 

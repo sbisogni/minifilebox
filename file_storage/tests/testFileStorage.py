@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock, call
 from io import BytesIO
 
-from file_storage.FileStorage import FileStorage
+from file_storage.FileStorage import FileStorage, generate_uuid_of, create_test_file_storage
 from file_storage.Minifile import Minifile
 
 
@@ -12,16 +12,6 @@ class FileStorageTestCase(unittest.TestCase):
         self.object_store_mock = Mock()
         self.context_store_mock = Mock()
         self.storage = FileStorage(self.context_store_mock, self.object_store_mock)
-
-    def testSaveThrowsRuntimeErrorIfNoIdGenerated(self):
-        # We disable the internal _save function as we are not interested for this test
-        def disable_internal_save(any):
-            pass
-
-        self.storage._save = disable_internal_save
-        mbf = Minifile("file", 1)
-
-        self.assertRaises(RuntimeError, self.storage.save, mbf)
 
     def testSaveCallsContextStoreToSaveFileMetadata(self):
         # We disable the internal _save function as we are not interested for this test
@@ -143,13 +133,20 @@ class FileStorageTestCase(unittest.TestCase):
 
         self.assertTrue(len(mbf.get_chunk_ids()) == 5)
 
-    def testSaveCallesObjectStoreForEachChunk(self):
+    def testSaveCallsObjectStoreForEachChunk(self):
+
+        FileStorage.GENERATE_OBJECT_ID = lambda x: x
+
         mbf = Minifile("file.txt", 1)
         mbf.set_file_stream(BytesIO('12345'.encode()))
 
         self.storage._save(mbf)
 
-        self.object_store_mock.save.assert_has_calls([call(b'1'), call(b'2'), call(b'3'), call(b'4'), call(b'5')])
+        self.object_store_mock.save.assert_has_calls([call(b'1', b'1'),
+                                                      call(b'2', b'2'),
+                                                      call(b'3', b'3'),
+                                                      call(b'4', b'4'),
+                                                      call(b'5', b'5')])
 
     def testSaveNoCallsObjectStoreIfStreamIsEmpty(self):
         mbf = Minifile("file.txt", 1)
@@ -234,3 +231,18 @@ class FileStorageTestCase(unittest.TestCase):
         self.storage._object_store.delete = delete_raise_io_error
 
         self.assertRaises(IOError, self.storage._delete, metadata)
+
+    def testIsUniqueIdGenerated(self):
+        self.assertTrue(generate_uuid_of("any"))
+
+    def testAreIdsUnique(self):
+        ids = []
+        for x in range(10000):
+            ids.append(x)
+
+        seen = set()
+        unique = [x for x in ids if x not in seen and not seen.add(x)]
+        self.assertEqual(len(ids), len(unique))
+
+    def testIsTestFileStorageGenerate(self):
+        self.assertTrue(create_test_file_storage())

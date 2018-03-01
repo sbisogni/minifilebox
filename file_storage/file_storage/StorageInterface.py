@@ -30,6 +30,8 @@ class ContextStoreInterface:
         :param file_id: The id of the file to delete
         :return: Minifile holding the information of the deleted file
         """
+        pass
+
     def list(self):
         """
         Returns information about all the file store in the FileStorage
@@ -43,10 +45,11 @@ class ObjectStoreInterface:
     The ObjectStore interface
     """
     
-    def save(self, obj):
+    def save(self, obj_id, obj):
         """
-        Store the given object and return its unique id inside the storage
+        Store the given (key, object) in the store
 
+        :param obj_id: the object unique id
         :param obj: the obj to store
         :return: Unique obj id
         """

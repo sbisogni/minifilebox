@@ -8,28 +8,29 @@ class ObjectStoreInMemoryTestCase(unittest.TestCase):
     def setUp(self):
         self.object_store = ObjectStoreInMemory()
 
-    def testSaveIsGeneratingUniqueId(self):
-        obj = "object"
-        self.assertTrue(self.object_store.save(obj))
-
     def testLoadRetrieveObjectById(self):
         exp_obj = "object"
-        id = self.object_store.save(exp_obj)
+        id = "key"
 
-        act_obj = self.object_store.load(id);
+        self.object_store.save(id, exp_obj)
+        act_obj = self.object_store.load(id)
 
         self.assertEqual(exp_obj, act_obj)
 
     def testDeleteErasesObjectById(self):
         obj = "object"
-        id = self.object_store.save(obj)
+        id = "id"
+
+        self.object_store.save(id, obj)
         self.object_store.delete(id)
 
         self.assertRaises(KeyError, self.object_store.load, id)
 
     def testDeleteReturnsErasedObject(self):
         exp_obj = "object"
-        id = self.object_store.save(exp_obj)
+        id = "key"
+
+        self.object_store.save(id, exp_obj)
         act_obj = self.object_store.delete(id)
 
         self.assertEqual(exp_obj, act_obj)
