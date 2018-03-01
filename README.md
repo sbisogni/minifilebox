@@ -48,8 +48,11 @@ Minifilebox exports REST endpoints to perform operations
 # Deployment
 
 * Requirements
-  * Docker: the applications in Dockers
+  * docker: https://www.docker.com/
   
-* How to run
-  Run the run_all.sh script
+* How To Run
+
+        git clone https://github.com/sbisogni/minifilebox.git
+        cd minifilebox
+        /bin/sh run_all.sh
 
