@@ -7,6 +7,6 @@ setup(
     url='https://github.com/sbisogni/minifilebox',
     author='Simone Bisogni',
     author_email='simone.bisogni@yahoo.it',
-    python_requires='>=3',
     packages=find_packages(),
+    install_requires=['cassandra-driver']
 )

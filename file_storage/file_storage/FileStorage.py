@@ -6,6 +6,7 @@ import tempfile
 import uuid
 import logging
 from file_storage import MemoryStorage
+from file_storage import CassandraStorage
 
 
 class FileStorage:
@@ -135,10 +136,11 @@ class FileStorage:
             self._object_store.delete(id)
 
 
-def create_test_file_storage():
-    """
-    Creates a new FileStorage with in-memory ContextStore and ObjectStore. This is aimed for testing
-    :return: FileStorage
-    """
+def create_memory_file_storage():
     return FileStorage(MemoryStorage.ContextStoreMemory(),
                        MemoryStorage.ObjectStoreInMemory())
+
+
+def create_cassandra_file_storage(cluster_nodes):
+    return FileStorage(CassandraStorage.ContextStoreCassandra(cluster_nodes),
+                       CassandraStorage.ObjectStoreCassandra(cluster_nodes))

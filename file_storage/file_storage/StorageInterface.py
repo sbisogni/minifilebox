@@ -59,7 +59,7 @@ class ObjectStoreInterface:
         Return the object identified by the given key
 
         :param key: unique object key
-        :return: KeyValue
+        :return: value the associated value
         :except KeyError if key cannot be found
         """
         pass

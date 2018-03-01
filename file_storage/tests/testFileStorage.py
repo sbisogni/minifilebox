@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock, call
 from io import BytesIO
 
-from file_storage.FileStorage import FileStorage, create_test_file_storage
+from file_storage.FileStorage import FileStorage, create_memory_file_storage, create_cassandra_file_storage
 from file_storage.Minifile import Minifile
 
 
@@ -244,5 +244,5 @@ class FileStorageTestCase(unittest.TestCase):
         unique = [x for x in ids if x not in seen and not seen.add(x)]
         self.assertEqual(len(ids), len(unique))
 
-    def testIsTestFileStorageGenerate(self):
-        self.assertTrue(create_test_file_storage())
+    def testIsMemoryFileStorageGenerate(self):
+        self.assertTrue(create_memory_file_storage())
