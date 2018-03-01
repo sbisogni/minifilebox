@@ -50,6 +50,6 @@ Minifilebox exports REST endpoints to perform operations
 * Requirements
   * Docker: the applications in Dockers
   
-* How to run
-  Run the run_all.sh script
+* How To Run
+  * Run the run_all.sh script
 
