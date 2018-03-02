@@ -82,7 +82,7 @@ class FileStorage:
         """
         minifile = self._context_store.load(file_id)
         self._delete(minifile)
-        self._context_store.delete(minifile)
+        self._context_store.delete(file_id)
         return minifile
 
     def list(self):
@@ -136,14 +136,3 @@ class FileStorage:
 
         for id in minifile.chunk_ids:
             self._object_store.delete(id)
-
-
-def create_memory_file_storage():
-    return FileStorage(MemoryStorage.ObjectStoreInMemory(),
-                       MemoryStorage.ObjectStoreInMemory())
-
-
-def create_cassandra_file_storage(key_space_context, key_space_obj, cluster_nodes):
-    return FileStorage(CassandraStorage.ContextStoreCassandra(key_space_context, cluster_nodes),
-                       CassandraStorage.ObjectStoreCassandra(key_space_obj, cluster_nodes))
-

@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import Mock, call
 import io
 
-from file_storage.FileStorage import FileStorage, create_memory_file_storage
+from file_storage.FileStorage import FileStorage
 from file_storage.Minifile import Minifile
 from file_storage.KeyValue import KeyValue
 
@@ -76,7 +76,7 @@ class FileStorageTestCase(unittest.TestCase):
 
         self.storage.delete(exp_file.file_id)
 
-        self.context_store_mock.delete.assert_has_calls([call(exp_file)])
+        self.context_store_mock.delete.assert_has_calls([call(exp_file.file_id)])
 
     def testDeleteReturnsMinifileOfDeletedFile(self):
         # We disable the internal _delete function as we are not interested for this test
@@ -224,6 +224,3 @@ class FileStorageTestCase(unittest.TestCase):
         seen = set()
         unique = [x for x in ids if x not in seen and not seen.add(x)]
         self.assertEqual(len(ids), len(unique))
-
-    def testIsMemoryFileStorageGenerate(self):
-        self.assertTrue(create_memory_file_storage())
