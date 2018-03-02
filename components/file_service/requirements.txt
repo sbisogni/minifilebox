@@ -1,7 +1,7 @@
 aniso8601==2.0.1
 cassandra-driver==3.13.0
 click==6.7
--e git+https://github.com/sbisogni/minifilebox.git@ddd5df45d3115ab8e6fdd9fbbadad14505120348#egg=file_storage&subdirectory=file_storage
+-e git+https://github.com/sbisogni/minifilebox.git@fb7d394b2d917589b19ca983bf1d81ea87af6048#egg=file_storage&subdirectory=file_storage
 Flask==0.12.2
 itsdangerous==0.24
 Jinja2==2.10
