@@ -1,19 +1,43 @@
 #!/usr/bin/env python
 
 from flask import Flask, request, jsonify, send_file
-from file_storage import FileStorage, Minifile
 from werkzeug.exceptions import BadRequest, NotFound, HTTPException, default_exceptions
+from file_storage.FileStorage import FileStorage, Minifile
+from file_storage.MemoryStorage import ObjectStoreInMemory, ContextStoreInMemory
+from file_storage.CassandraStorage import ObjectStoreCassandra, ContextStoreCassandra
+
+
 import config
 
 
 app = Flask(__name__)
 
+# FACTORY METHODS
+
+
+def create_local_memory_file_storage():
+    return FileStorage(ContextStoreInMemory(), ObjectStoreInMemory())
+
+
+def create_local_cassandra_file_storage():
+    return FileStorage(ContextStoreCassandra(key_space=config.MINIFILEBOX_CASSANDRA_CONTEXT_KEY_SPACE,
+                                             cluster_nodes=config.MINIFILEBOX_CASSANDRA_CLUSTER),
+                       ObjectStoreCassandra(key_space=config.MINIFILEBOX_CASSANDRA_OBJECT_KEY_SPACE,
+                                            cluster_nodes=config.MINIFILEBOX_CASSANDRA_CLUSTER))
+
+
+def create_remote_file_storate():
+    pass
+
+
 file_storage_factory = {
-    'cassandra': FileStorage.create_cassandra_file_storage,
-    'memory': FileStorage.create_memory_file_storage()
+    'cassandra': create_local_cassandra_file_storage,
+    'memory': create_local_memory_file_storage,
+    'remote': create_remote_file_storate
 }
 
-file_storage = file_storage_factory[config.MINIFILEBOX_STORAGE_TYPE]
+
+file_storage = file_storage_factory[config.MINIFILEBOX_STORAGE_TYPE]()
 
 
 @app.route(config.MINIFILEBOX_BASE_URI + '/files/upload', methods=['POST'])
@@ -52,14 +76,13 @@ def upload_file():
 
     chunk_size = config.MINIFILEBOX_CHUNK_SIZE
 
-    minifile = Minifile.Minifile(file.filename, chunk_size)
-    minifile.set_file_stream(file.stream)
+    minifile = Minifile(file_stream=file.stream, file_name=file.filename, chunk_size=chunk_size)
     file_storage.save(minifile)
 
-    return jsonify(minifile.to_dict()), 200
+    return jsonify(minifile.to_json()), 200
 
 
-@app.route(config.MINIFILEBOX_BASE_URI + '/files/download/<int:file_id>', methods=['GET'])
+@app.route(config.MINIFILEBOX_BASE_URI + '/files/download/<string:file_id>', methods=['GET'])
 def download_file(file_id):
     """
     Download the file with given id
@@ -69,17 +92,14 @@ def download_file(file_id):
     :param file_id:
     :return: The file in mimetype='application/octet-stream'
     """
-    try:
-        minifile = file_storage.load(file_id)
-        return send_file(minifile.get_file_stream(),
-                         attachment_filename=minifile.get_file_name(),
-                         as_attachment=True,
-                         mimetype='application/octet-stream'), 200
-    except KeyError as e:
-        raise NotFound(str(e))
+    minifile = file_storage.load(file_id)
+    return send_file(minifile.file_stream,
+                     attachment_filename=minifile.file_name,
+                     as_attachment=True,
+                     mimetype='application/octet-stream'), 200
 
 
-@app.route(config.MINIFILEBOX_BASE_URI + '/files/delete/<int:file_id>', methods=['DELETE'])
+@app.route(config.MINIFILEBOX_BASE_URI + '/files/delete/<string:file_id>', methods=['DELETE'])
 def delete_file(file_id):
     """
     Delete the file with given id
@@ -90,7 +110,7 @@ def delete_file(file_id):
     :return: The file metadata of deleted file
          {
             "chunk_size": <chunk_size>,
-            "chunks": [
+            "chunk_ids": [
                 17,
                 18,
                 19,
@@ -106,7 +126,7 @@ def delete_file(file_id):
     """
     try:
         minifile = file_storage.delete(file_id)
-        return jsonify(minifile.to_dict()), 200
+        return jsonify(minifile.to_json()), 200
     except KeyError as e:
         raise NotFound(str(e))
 
@@ -122,7 +142,7 @@ def list_files():
         [
             {
                 "chunk_size": 50000000,
-                "chunks": [
+                "chunk_ids": [
                     1,
                     2,
                     3,
@@ -137,7 +157,7 @@ def list_files():
             },
             {
                 "chunk_size": 50000000,
-                "chunks": [
+                "chunk_ids": [
                     17,
                     18,
                     19,
@@ -153,19 +173,19 @@ def list_files():
         ]
     """
     minifile_list = file_storage.list()
-    return jsonify([m.to_dict() for m in minifile_list]), 200
+    return jsonify([m.to_json() for m in minifile_list]), 200
 
 
-@app.errorhandler(Exception)
-def handle_error(e):
-    code = 500
-    if isinstance(e, HTTPException):
-        code = e.code
-    return jsonify(error=str(e)), code
+# @app.errorhandler(Exception)
+# def handle_error(e):
+#     code = 500
+#     if isinstance(e, HTTPException):
+#         code = e.code
+#     return jsonify(error=str(e)), code
 
 
 if __name__ == '__main__':
     # Overriding default HTML exception handler
-    for ex in default_exceptions:
-        app.register_error_handler(ex, handle_error)
+    # for ex in default_exceptions:
+    #     app.register_error_handler(ex, handle_error)
     app.run(host='0.0.0.0')
