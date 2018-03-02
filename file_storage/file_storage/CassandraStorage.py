@@ -7,47 +7,48 @@ from cassandra.cqlengine.models import Model
 from cassandra.cqlengine.management import sync_table, create_keyspace_simple
 
 
-class KeyValue(Model):
+class ObjectKeyValue(Model):
     key = columns.UUID(primary_key=True)
     value = columns.Blob()
 
 
+class ContextKeyValue(Model):
+    key = columns.UUID(primary_key=True)
+    value = columns.Text()
+
+
 class ObjectStoreCassandra:
 
-    KEY_SPACE = 'minifilebox_objects'
-
-    def __init__(self, cluster_nodes):
-        connection.setup(cluster_nodes, self.KEY_SPACE)
-        create_keyspace_simple(self.KEY_SPACE, 1)
-        sync_table(KeyValue)
+    def __init__(self, key_space, cluster_nodes):
+        connection.setup(cluster_nodes, key_space)
+        create_keyspace_simple(key_space, 1)
+        sync_table(ObjectKeyValue)
 
     def save(self, key, value):
-        KeyValue.create(key=key, value=value)
+        ObjectKeyValue.create(key=key, value=value)
 
     def load(self, key):
-        return KeyValue.get(key=key).value
+        return ObjectKeyValue.get(key=key).value
 
     def delete(self, key):
-        KeyValue(key=key).delete()
+        ObjectKeyValue(key=key).delete()
 
 
 class ContextStoreCassandra:
 
-    KEY_SPACE = 'minifilebox_context'
+    def __init__(self, key_space, cluster_nodes):
+        connection.setup(cluster_nodes, key_space)
+        create_keyspace_simple(key_space, 1)
+        sync_table(ContextKeyValue)
 
-    def __init__(self, cluster_nodes):
-        connection.setup(cluster_nodes, self.KEY_SPACE)
-        create_keyspace_simple(self.KEY_SPACE, 1)
-        sync_table(KeyValue)
-
-    def save(self, minifile):
-        KeyValue.create(key=minifile.get_file_id(), value=str(minifile.to_dict()).encode())
+    def save(self, key, value):
+        ContextKeyValue.create(key=key, value=value)
 
     def load(self, key):
-        return KeyValue.get(key=key).value.decode()
+        return ContextKeyValue.get(key=key).value
 
     def delete(self, key):
-        KeyValue(key=key).delete()
+        ContextKeyValue(key=key).delete()
 
     def list(self):
-        return [o.value for o in KeyValue.objects()]
+        return [x.value for x in ContextKeyValue.objects().all()]

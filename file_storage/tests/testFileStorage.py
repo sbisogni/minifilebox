@@ -1,10 +1,10 @@
 import unittest
 from unittest.mock import Mock, call
-import uuid
 import io
 
-from file_storage.FileStorage import FileStorage, create_memory_file_storage, create_cassandra_file_storage
+from file_storage.FileStorage import FileStorage, create_memory_file_storage
 from file_storage.Minifile import Minifile
+from file_storage.KeyValue import KeyValue
 
 
 class FileStorageTestCase(unittest.TestCase):
@@ -20,11 +20,11 @@ class FileStorageTestCase(unittest.TestCase):
             pass
 
         self.storage._save = disable_internal_save
-        mbf = Minifile()
+        file = Minifile()
 
-        self.storage.save(mbf)
+        self.storage.save(file)
 
-        self.context_store_mock.save.assert_has_calls([call(mbf.file_id, mbf.to_json())])
+        self.context_store_mock.save.assert_has_calls([call(file)])
 
     def testLoadCallsContextStoreToLoadFileMetadata(self):
         # We disable the internal _load function as we are not interested for this test
@@ -32,22 +32,22 @@ class FileStorageTestCase(unittest.TestCase):
             pass
 
         self.storage._load = disable_internal_load
-        exp_file = Minifile(file_id=uuid.uuid4())
+        exp_file = Minifile(file_id="id")
 
         self.context_store_mock.load.return_value = exp_file.to_json()
         self.storage.load(exp_file.file_id)
 
         self.context_store_mock.load.assert_has_calls([call(exp_file.file_id)])
 
-    def testLoadReturnsMinifileOfLoadedFile(self):
+    def testLoadReturnsMinifile(self):
         # We disable the internal _load function as we are not interested for this test
         def disable_internal_load(any):
             pass
 
         self.storage._load = disable_internal_load
-        exp_file = Minifile(file_id=uuid.uuid4(), file_name="file")
+        exp_file = Minifile(file_id="id", file_name="file")
 
-        self.context_store_mock.load.return_value = exp_file.to_json()
+        self.context_store_mock.load.return_value = exp_file
         act_file = self.storage.load(exp_file.file_id)
 
         self.assertEqual(exp_file, act_file)
@@ -58,7 +58,7 @@ class FileStorageTestCase(unittest.TestCase):
             pass
 
         self.storage._delete = disable_internal_delete
-        exp_file = Minifile(file_id=uuid.uuid4())
+        exp_file = Minifile(file_id="id")
         self.context_store_mock.load.return_value = exp_file.to_json()
 
         self.storage.delete(exp_file.file_id)
@@ -71,12 +71,12 @@ class FileStorageTestCase(unittest.TestCase):
             pass
 
         self.storage._delete = disable_internal_delete
-        exp_file = Minifile(file_id=uuid.uuid4())
-        self.context_store_mock.load.return_value = exp_file.to_json()
+        exp_file = Minifile(file_id="id")
+        self.context_store_mock.load.return_value = exp_file
 
         self.storage.delete(exp_file.file_id)
 
-        self.context_store_mock.delete.assert_has_calls([call(exp_file.file_id)])
+        self.context_store_mock.delete.assert_has_calls([call(exp_file)])
 
     def testDeleteReturnsMinifileOfDeletedFile(self):
         # We disable the internal _delete function as we are not interested for this test
@@ -84,26 +84,26 @@ class FileStorageTestCase(unittest.TestCase):
             pass
 
         self.storage._delete = disable_internal_delete
-        exp_file = Minifile(file_id=uuid.uuid4())
-        self.context_store_mock.load.return_value = exp_file.to_json()
+        exp_file = Minifile(file_id="id")
+        self.context_store_mock.load.return_value = exp_file
 
         act_file = self.storage.delete(exp_file.file_id)
 
         self.assertEqual(exp_file, act_file)
 
     def testListCallsContextStoreToListFiles(self):
-        exp_list = [Minifile(file_id=uuid.uuid4()),
-                    Minifile(file_id=uuid.uuid4())]
-        self.context_store_mock.list.return_value = [x.to_json() for x in exp_list]
+        exp_list = [Minifile(file_id="1"),
+                    Minifile(file_id="2")]
+        self.context_store_mock.list.return_value = [Minifile().from_json(obj.to_json()) for obj in exp_list]
 
         self.storage.list()
 
         self.context_store_mock.list.assert_called()
 
     def testListReturnsListOfFiles(self):
-        exp_list = [Minifile(file_id=uuid.uuid4()),
-                    Minifile(file_id=uuid.uuid4())]
-        self.context_store_mock.list.return_value = [x.to_json() for x in exp_list]
+        exp_list = [Minifile(file_id="1"),
+                    Minifile(file_id="2")]
+        self.context_store_mock.list.return_value = [Minifile().from_json(obj.to_json()) for obj in exp_list]
 
         act_list = self.storage.list()
 
@@ -139,17 +139,18 @@ class FileStorageTestCase(unittest.TestCase):
 
     def testSaveCallsObjectStoreForEachChunk(self):
 
-        FileStorage.generate_object_id = lambda x: x
+        FileStorage.generate_object_id = lambda x: 'id'
+
         stream = io.BytesIO('12345'.encode())
         mbf = Minifile(file_stream=stream, chunk_size=1)
 
         self.storage._save(mbf)
 
-        self.object_store_mock.save.assert_has_calls([call(b'1', b'1'),
-                                                      call(b'2', b'2'),
-                                                      call(b'3', b'3'),
-                                                      call(b'4', b'4'),
-                                                      call(b'5', b'5')])
+        self.object_store_mock.save.assert_has_calls([call(KeyValue('id', b'1')),
+                                                      call(KeyValue('id', b'2')),
+                                                      call(KeyValue('id', b'3')),
+                                                      call(KeyValue('id', b'4')),
+                                                      call(KeyValue('id', b'5'))])
 
     def testSaveNoCallsObjectStoreIfStreamIsEmpty(self):
         mbf = Minifile(file_stream=io.BytesIO(), chunk_size=1)
@@ -159,24 +160,17 @@ class FileStorageTestCase(unittest.TestCase):
         self.object_store_mock.assert_not_called()
 
     # # VALIDATION INTERNAL LOAD METHOD
-    #
     def testLoadThrowsValueErrorIsFileMetadataHasNoChunks(self):
         mbf = Minifile()
         self.assertRaises(ValueError, self.storage._load, mbf)
 
     def testLoadCallsObjectStoreForEachChunk(self):
-        mbf = Minifile(chunk_ids=[1,2,3,4,5])
+        mbf = Minifile(chunk_ids=[1, 2, 3, 4, 5])
 
-        self.object_store_mock.load.return_value = b'12345'
+        self.object_store_mock.load.return_value = KeyValue('id', b'12345')
 
         self.storage._load(mbf)
         self.object_store_mock.load.assert_has_calls([call(1), call(2), call(3), call(4), call(5)])
-
-    def testLoadThrowsIOErrorIfChunkCannotBeFound(self):
-        metadata = Minifile(chunk_ids=[1,2])
-
-        self.object_store_mock.load.return_value = None
-        self.assertRaises(IOError, self.storage._load, metadata)
 
     def testLoadReturnsStream(self):
         exp_stream = io.BytesIO('12345'.encode())
@@ -184,11 +178,11 @@ class FileStorageTestCase(unittest.TestCase):
 
         mbf = Minifile(chunk_size=chunk_size,
                        file_stream=exp_stream,
-                       chunk_ids=[1,2,3,4,5])
+                       chunk_ids=[1, 2, 3, 4, 5])
 
         # Work around as I cannot manage to make it working with Mock library
         def load_return_exp_stream(id):
-            return exp_stream.read(chunk_size)
+            return KeyValue(id, exp_stream.read(chunk_size))
 
         self.storage._object_store.load = load_return_exp_stream
         self.storage._load(mbf)
@@ -204,7 +198,7 @@ class FileStorageTestCase(unittest.TestCase):
         self.assertRaises(ValueError, self.storage._delete, mbf)
 
     def testDeleteCallsObjectStoreDeleteForEachChunkId(self):
-        mbf = Minifile(chunk_ids=[1,2,3])
+        mbf = Minifile(chunk_ids=[1, 2, 3])
 
         calls = [call(1), call(2), call(3)]
         self.storage._delete(mbf)

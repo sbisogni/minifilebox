@@ -6,6 +6,7 @@ import tempfile
 import uuid
 import logging
 from file_storage.Minifile import Minifile
+from file_storage.KeyValue import KeyValue
 from file_storage import MemoryStorage
 from file_storage import CassandraStorage
 
@@ -27,7 +28,7 @@ class FileStorage:
         :param value: not used
         :return: the unique id
         """
-        return uuid.uuid4()
+        return str(uuid.uuid4().hex)
 
     # Called by FileStorage to generate object id
     generate_object_id = generate_uuid_of
@@ -51,7 +52,7 @@ class FileStorage:
         Store the given file in the FileStorage splitting it in chunks of the dimension as given in the Minifile
         The chunk size must be included among [MIN_CHUNK_SIZE, MAX_CHUNK_SIZE]
         :param minifile: Minifile holding the information of the file to store. Once the file is stored further
-                            metadata are added to the structure
+                        metadata are added to the structure
         """
         logging.info('saving file_name = %s, chunk_size = %s' % (minifile.file_name, minifile.chunk_size))
         # Generate the unique file id
@@ -59,7 +60,7 @@ class FileStorage:
         self._save(minifile)
 
         logging.info('saving in context store minifile = %s' % minifile.to_json())
-        self._context_store.save(minifile.file_id, minifile.to_json())
+        self._context_store.save(minifile)
 
         logging.info('file storage save done - file_name = %s, file_id = %s' % (minifile.file_name, minifile.file_id))
 
@@ -69,8 +70,7 @@ class FileStorage:
         :param file_id: the id of the file to load
         :return Minifile holding the file details
         """
-        minifile = Minifile()
-        minifile.from_json(self._context_store.load(file_id))
+        minifile = self._context_store.load(file_id)
         self._load(minifile)
         return minifile
 
@@ -80,10 +80,9 @@ class FileStorage:
         :param file_id: the id of the file to delete
         :return: Minifile holding the file details
         """
-        minifile = Minifile()
-        minifile.from_json(self._context_store.load(file_id))
+        minifile = self._context_store.load(file_id)
         self._delete(minifile)
-        self._context_store.delete(file_id)
+        self._context_store.delete(minifile)
         return minifile
 
     def list(self):
@@ -91,7 +90,7 @@ class FileStorage:
         Returns information about all the file store in the FileStorage
         :return: List[Minifile]
         """
-        return [Minifile().from_json(x) for x in self._context_store.list()]
+        return self._context_store.list()
 
     # PRIVATE IMPLEMENTATION
 
@@ -110,7 +109,7 @@ class FileStorage:
             chunk = file_stream.read(chunk_size)
             if len(chunk) is not 0:
                 obj_id = FileStorage.generate_object_id(chunk)
-                self._object_store.save(obj_id, chunk)
+                self._object_store.save(KeyValue(key=obj_id, value=chunk))
                 minifile.chunk_ids.append(obj_id)
             else:
                 break
@@ -122,16 +121,14 @@ class FileStorage:
         tmp_file = None
         for id in minifile.chunk_ids:
             chunk = self._object_store.load(id)
-            if not chunk:
-                raise IOError("No chunk found for id = %s", id)
             # We have at least one good chunk we create the tmp file
             if not tmp_file:
                 tmp_file = tempfile.SpooledTemporaryFile()
 
-            tmp_file.write(chunk)
+            tmp_file.write(chunk.value)
 
         tmp_file.seek(0)
-        minifile.file_stream=tmp_file
+        minifile.file_stream = tmp_file
 
     def _delete(self, minifile):
         if not minifile.chunk_ids:
@@ -146,6 +143,7 @@ def create_memory_file_storage():
                        MemoryStorage.ObjectStoreInMemory())
 
 
-def create_cassandra_file_storage(cluster_nodes):
-    return FileStorage(CassandraStorage.ContextStoreCassandra(cluster_nodes),
-                       CassandraStorage.ObjectStoreCassandra(cluster_nodes))
+def create_cassandra_file_storage(key_space_context, key_space_obj, cluster_nodes):
+    return FileStorage(CassandraStorage.ContextStoreCassandra(key_space_context, cluster_nodes),
+                       CassandraStorage.ObjectStoreCassandra(key_space_obj, cluster_nodes))
+

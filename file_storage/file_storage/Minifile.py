@@ -2,7 +2,6 @@
 Representation of a file inside Minifilebox
 """
 import json
-import uuid
 
 
 class Minifile:
@@ -11,11 +10,11 @@ class Minifile:
         """
         Represent a file inside the minifilebox
 
-        :param file_id: file uuid
+        :param file_id: file id
         :param file_name: name of the file
         :param file_stream: file data
         :param chunk_size: size of the chunks
-        :param chunk_ids: ids of the chunks
+        :param chunk_ids: uuids of the chunks
         """
         self.file_id = file_id
         self.file_name = file_name
@@ -30,7 +29,7 @@ class Minifile:
             data['file_name'] = self.file_name
 
         if self.file_id:
-            data['file_id'] = self.file_id.hex
+            data['file_id'] = self.file_id
 
         if self.chunk_size:
             data['chunk_size'] = self.chunk_size
@@ -45,7 +44,7 @@ class Minifile:
         if 'file_name' in data:
             self.file_name = data['file_name']
         if 'file_id' in data:
-            self.file_id = uuid.UUID(data['file_id'])
+            self.file_id = data['file_id']
         if 'chunk_size' in data:
             self.chunk_size = data['chunk_size']
         if 'chunk_ids' in data:
