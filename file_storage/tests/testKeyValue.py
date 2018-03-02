@@ -1,26 +1,22 @@
 import unittest
+import json
+import uuid
 from file_storage.KeyValue import KeyValue
 
 
 class KeyValueTestCase(unittest.TestCase):
 
-    def testKeyValueThrowsValueErrorIfKeyIsNone(self):
-        self.assertRaises(ValueError, KeyValue, None, "Any")
+    def testKeyValueToJsonWhenNoFields(self):
+        self.assertEqual('{}', KeyValue().to_json())
 
-    def testKeyValueThrowsValueErrorIfValueIsNone(self):
-        self.assertRaises(ValueError, KeyValue, "Any", None)
+    def testKeyValueToJson(self):
+        key_value = KeyValue(key=uuid.uuid4(), value="value")
+        d = {'key': key_value.key.hex, 'value': key_value.value}
 
-    def testKeyIsSetAndRetrieved(self):
-        exp_key = "key"
-        self.assertEqual(exp_key, KeyValue(exp_key, "Any").get_key())
+        self.assertEqual(json.dumps(d, sort_keys=True), key_value.to_json())
 
-    def testValueIsSetAndRetrieved(self):
-        exp_value = "value"
-        self.assertEqual(exp_value, KeyValue("Any", exp_value).get_value())
+    def testKeyValueFromJson(self):
+        exp_key_value = KeyValue(key=uuid.uuid4(), value="value")
+        json_obj = exp_key_value.to_json()
 
-    def testKeyValueToDict(self):
-        exp_key = "key"
-        exp_value = "value"
-        exp_dict = {'key': exp_key, 'value': exp_value}
-
-        self.assertEqual(exp_dict, KeyValue(exp_key, exp_value).to_dict())
+        self.assertEqual(exp_key_value, KeyValue().from_json(json_obj))

@@ -1,60 +1,57 @@
 """
 Representation of a file inside Minifilebox
 """
+import json
+import uuid
 
 
 class Minifile:
 
-    def __init__(self, file_name, chunk_size):
+    def __init__(self, file_id=None, file_name=None, file_stream=None, chunk_size=0, chunk_ids=None):
         """
-        Representation of a file metadata inside Minifilebox. All file metadata information to operate on the file
+        Represent a file inside the minifilebox
 
-        :param file_name: the filename to which the metadata is associated to
-        :param chunk_size: the size of the file's chunks
+        :param file_id: file uuid
+        :param file_name: name of the file
+        :param file_stream: file data
+        :param chunk_size: size of the chunks
+        :param chunk_ids: ids of the chunks
         """
-        if not file_name:
-            raise ValueError("file_name cannot be empty")
-
-        self.file_id = None
-        self.file_stream = None
+        self.file_id = file_id
         self.file_name = file_name
+        self.file_stream = file_stream
         self.chunk_size = chunk_size
-        self.chunk_ids = []
+        self.chunk_ids = chunk_ids if chunk_ids is not None else []
 
-    def add_chunk_id(self, chunk_id):
-        self.chunk_ids.append(chunk_id)
+    def to_json(self):
+        data = dict()
 
-    def get_chunk_ids(self):
-        return self.chunk_ids
-
-    def get_chunk_size(self):
-        return self.chunk_size
-
-    def get_file_name(self):
-        return self.file_name
-
-    def get_file_id(self):
-        return self.file_id
-
-    def set_file_id(self, id):
-        self.file_id = id
-
-    def get_file_stream(self):
-        return self.file_stream
-
-    def set_file_stream(self, stream):
-        self.file_stream = stream
-
-    def to_dict(self):
-        result = dict()
-
-        result['file_name'] = self.file_name
-        result['chunk_size'] = self.chunk_size
+        if self.file_name:
+            data['file_name'] = self.file_name
 
         if self.file_id:
-            result['file_id'] = self.file_id
+            data['file_id'] = self.file_id.hex
+
+        if self.chunk_size:
+            data['chunk_size'] = self.chunk_size
 
         if self.chunk_ids:
-            result['chunks'] = self.chunk_ids
+            data['chunk_ids'] = self.chunk_ids
 
-        return result
+        return json.dumps(data, sort_keys=True)
+
+    def from_json(self, s):
+        data = json.loads(s)
+        if 'file_name' in data:
+            self.file_name = data['file_name']
+        if 'file_id' in data:
+            self.file_id = uuid.UUID(data['file_id'])
+        if 'chunk_size' in data:
+            self.chunk_size = data['chunk_size']
+        if 'chunk_ids' in data:
+            self.chunk_ids = data['chunk_ids']
+
+        return self
+
+    def __eq__(self, other):
+        return self.to_json() == other.to_json()

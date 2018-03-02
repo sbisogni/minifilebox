@@ -40,11 +40,11 @@ class ContextStoreCassandra:
         create_keyspace_simple(self.KEY_SPACE, 1)
         sync_table(KeyValue)
 
-    def save(self, key, value):
-        KeyValue.create(key=key, value=value)
+    def save(self, minifile):
+        KeyValue.create(key=minifile.get_file_id(), value=str(minifile.to_dict()).encode())
 
     def load(self, key):
-        return KeyValue.get(key=key).value
+        return KeyValue.get(key=key).value.decode()
 
     def delete(self, key):
         KeyValue(key=key).delete()

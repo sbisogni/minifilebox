@@ -20,7 +20,8 @@ class ContextStoreInterface:
         """
         Load the metadata associated to the given id
         :param file_id: The unique file id
-        :return: Minifile holding the information of the file
+        :return Minifile instance
+        :except KeyError if file not found
         """
         pass
 
@@ -28,7 +29,7 @@ class ContextStoreInterface:
         """
         Delete the metadata of the given file id
         :param file_id: The id of the file to delete
-        :return: Minifile holding the information of the deleted file
+        :except KeyError if file not found
         """
         pass
 

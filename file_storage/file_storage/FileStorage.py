@@ -5,6 +5,7 @@ FileStorage store the file splitting them in chunks
 import tempfile
 import uuid
 import logging
+from file_storage.Minifile import Minifile
 from file_storage import MemoryStorage
 from file_storage import CassandraStorage
 
@@ -52,15 +53,15 @@ class FileStorage:
         :param minifile: Minifile holding the information of the file to store. Once the file is stored further
                             metadata are added to the structure
         """
-        logging.info('saving file_name = %s, chunk_size = %s' % (minifile.get_file_name(), minifile.get_chunk_size()))
+        logging.info('saving file_name = %s, chunk_size = %s' % (minifile.file_name, minifile.chunk_size))
         # Generate the unique file id
-        minifile.set_file_id(FileStorage.generate_file_id(minifile))
+        minifile.file_id = FileStorage.generate_file_id(minifile)
         self._save(minifile)
 
-        logging.info('saving in context store minifile = %s' % minifile.to_dict())
-        self._context_store.save(minifile)
+        logging.info('saving in context store minifile = %s' % minifile.to_json())
+        self._context_store.save(minifile.file_id, minifile.to_json())
 
-        logging.info('file storage save done - file_name = %s, file_id = %s' % (minifile.get_file_name(), minifile.get_file_id()))
+        logging.info('file storage save done - file_name = %s, file_id = %s' % (minifile.file_name, minifile.file_id))
 
     def load(self, file_id):
         """
@@ -68,7 +69,8 @@ class FileStorage:
         :param file_id: the id of the file to load
         :return Minifile holding the file details
         """
-        minifile = self._context_store.load(file_id)
+        minifile = Minifile()
+        minifile.from_json(self._context_store.load(file_id))
         self._load(minifile)
         return minifile
 
@@ -78,15 +80,18 @@ class FileStorage:
         :param file_id: the id of the file to delete
         :return: Minifile holding the file details
         """
-        self._delete(self._context_store.load(file_id))
-        return self._context_store.delete(file_id)
+        minifile = Minifile()
+        minifile.from_json(self._context_store.load(file_id))
+        self._delete(minifile)
+        self._context_store.delete(file_id)
+        return minifile
 
     def list(self):
         """
         Returns information about all the file store in the FileStorage
         :return: List[Minifile]
         """
-        return self._context_store.list()
+        return [Minifile().from_json(x) for x in self._context_store.list()]
 
     # PRIVATE IMPLEMENTATION
 
@@ -94,28 +99,28 @@ class FileStorage:
     MAX_TMP_FILE_SIZE = 0 # Default value
 
     def _save(self, minifile):
-        chunk_size = minifile.get_chunk_size()
+        chunk_size = minifile.chunk_size
         if chunk_size < FileStorage.MIN_CHUNK_SIZE or chunk_size > FileStorage.MAX_CHUNK_SIZE:
             raise ValueError('chunks size must be included [%s, %s]',
                              FileStorage.MIN_CHUNK_SIZE, FileStorage.MAX_CHUNK_SIZE)
 
-        file_stream = minifile.get_file_stream()
-        done = False
-        while not done:
+        file_stream = minifile.file_stream
+
+        while True:
             chunk = file_stream.read(chunk_size)
             if len(chunk) is not 0:
                 obj_id = FileStorage.generate_object_id(chunk)
                 self._object_store.save(obj_id, chunk)
-                minifile.add_chunk_id(obj_id)
+                minifile.chunk_ids.append(obj_id)
             else:
-                done = True
+                break
 
     def _load(self, minifile):
-        if len(minifile.get_chunk_ids()) is 0:
+        if not minifile.chunk_ids:
             raise ValueError("No chunks in metadata, file cannot be rebuilt")
 
         tmp_file = None
-        for id in minifile.get_chunk_ids():
+        for id in minifile.chunk_ids:
             chunk = self._object_store.load(id)
             if not chunk:
                 raise IOError("No chunk found for id = %s", id)
@@ -126,18 +131,18 @@ class FileStorage:
             tmp_file.write(chunk)
 
         tmp_file.seek(0)
-        minifile.set_file_stream(tmp_file)
+        minifile.file_stream=tmp_file
 
     def _delete(self, minifile):
-        if len(minifile.get_chunk_ids()) is 0:
+        if not minifile.chunk_ids:
             raise ValueError("No chunks in metadata, file cannot deleted")
 
-        for id in minifile.get_chunk_ids():
+        for id in minifile.chunk_ids:
             self._object_store.delete(id)
 
 
 def create_memory_file_storage():
-    return FileStorage(MemoryStorage.ContextStoreMemory(),
+    return FileStorage(MemoryStorage.ObjectStoreInMemory(),
                        MemoryStorage.ObjectStoreInMemory())
 
 
