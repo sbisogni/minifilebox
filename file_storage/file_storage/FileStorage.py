@@ -114,6 +114,7 @@ class FileStorage:
             else:
                 break
 
+
     def _load(self, minifile):
         if not minifile.chunk_ids:
             raise ValueError("No chunks in metadata, file cannot be rebuilt")

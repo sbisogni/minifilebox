@@ -1,0 +1,11 @@
+[run]
+source=
+	.
+omit=
+	./env/*
+	setup.py
+	file_storage/StorageInterface.py
+	
+
+
+

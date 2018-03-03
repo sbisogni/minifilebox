@@ -4,6 +4,7 @@ Model a KeyValue object to be stored inside the ObjectStore
 import json
 import base64
 
+
 class KeyValue:
 
     def __init__(self, key=None, value=None):
@@ -12,7 +13,6 @@ class KeyValue:
         :param key: object key
         :param value: value to store
         """
-
         self.key = key
         self.value = value
 
