@@ -45,14 +45,80 @@ Minifilebox exports REST endpoints to perform operations
        curl -X GET http://<host:port>/minifilebox/api/v1/files
             -H 'cache-control: no-cache'
 
+# Project Structure
+
+* **file_storage**: it is provide the core functionalities for handling the files inside the system, splitting them and managing the associated metadata.
+    
+    * **[FileStorage.py](https://github.com/sbisogni/minifilebox/blob/master/file_storage/file_storage/FileStorage.py)** class implements the core logic. It calls the ObjectStore interface to store files chunks and with the ContextInterface for storing file metadata (Minifile)
+    * **[ObjectStoreInterface](https://github.com/sbisogni/minifilebox/blob/master/file_storage/file_storage/StorageInterface.py)** class provides the methods to interact with the chunks storage
+    * **[ContextStoreInterface](https://github.com/sbisogni/minifilebox/blob/master/file_storage/file_storage/StorageInterface.py)** class provides the methods to interact with the Minifile storage
+    * **[MemoryStorage](https://github.com/sbisogni/minifilebox/blob/master/file_storage/file_storage/MemoryStorage.py)** module provides the implementation of the StorageInterface when using a simple memory DB. Aimed for testing
+    * **[CassandraStorage](https://github.com/sbisogni/minifilebox/blob/master/file_storage/file_storage/CassandraStorage.py)** module provides the implementation of the StorageInterface when the system is backed by Cassandra DB
+    * **[HTTPProxyStorage](https://github.com/sbisogni/minifilebox/blob/master/file_storage/file_storage/HTTPProxyStorage.py)** module provides the implementation of the StorageInterface when the storage systems are remote services which can be contected by HTTP Rest endpoints (*Not Finalized*)
+    
+  This structure allows to instantiate of the FileStorage class with different configurations allowing the system to easily scale and distributing each component of the system if required
+  
+* **components**: here is where are located the different applications which will run inside dedicated Docker containers
+
+    * **[file_service](https://github.com/sbisogni/minifilebox/blob/master/components/file_service/app.py)** application provides the rest endpoints to interact with the Minifilebox system. Check the [config.py](https://github.com/sbisogni/minifilebox/blob/master/components/file_service/config.py) to see configuration options. 
+        
+        *MINIFILEBOX_CHUNK_SIZE*: Default chunk size
+        *MINIFILEBOX_STORAGE_TYPE*: Specify the FileStorage layout. Valid value are: *memory* (local memory db), *cassandra* (local cassandra db), *remote* (remote storage)   
+ 
+    * **storage_service** application provides the rest endpoints for remote Object and Context storage (*Not implemented yet*)
+
+# Current Status
+
+Here a summary of the current implementation respect to proposed final architecture. 
+
+ **The current status does not match the avaibility and scalability requirements**
+ 
+Currently the file_service is working only the the test memory DB. Using this configuration the core Minfilebox functionaliries are implemented.
+Currently working on integrating Cassandra but many integration issues so far. As well report Storage endpoints to be implemented.
+Once those components will be implemented, thanks to the implementation design, it will be possible to plug them trasparently without just setting the MINIFILEBOX_STORAGE_TYPE parameter. 
+Once the Cassandra storage and the HTTP Storage endpoints will be implemented then it will be possible to run each service into separate docker containers and operate them inside Kubernetes so to grant continous availabilty and horizontal scaling
+ 
 # Deployment
 
 * Requirements
   * docker: https://www.docker.com/
   
-* How To Run
+  This is the only requirement if you want to run the application. Docker will take care to all the rest.
+  To run the unittest and integration test the following are also required:
+  
+  * python 3: https://www.python.org/download/releases/3.0/
+  * pip3: https://pypi.python.org/pypi/pip
+  * virtualenv: https://virtualenv.pypa.io/en/stable/ (optional, if you do not want to mess with your python env)
+  
+* How To Run Minifilebox
 
         git clone https://github.com/sbisogni/minifilebox.git
         cd minifilebox
-        /bin/sh run_all.sh
+        ./bin/run_all.sh
 
+The file service is now running on 0.0.0.0. This is the entry point for the rest endpoints. You can target it to the URI: 
+
+    http://0.0.0.0:5000/minifileboc/api/v1/files
+
+
+* How to Run Unittest and Integration Tests
+
+Prepare the python environment 
+
+        cd minifilebox
+        virtualenv 
+        source env/bin/activate
+        pip install -r requirements.txt
+        
+Now that the environment is ready you can run both unittest and integration tests
+Unittest are implemented for the core file_storage package.
+
+For unittest run 
+   
+        ./bin/run_unittest.sh 
+
+For integration tests run
+
+        ./bin/run_integration_tests.sh
+ 
+                
