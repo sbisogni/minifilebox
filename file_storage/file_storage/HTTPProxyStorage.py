@@ -36,12 +36,12 @@ class ContextStoreHTTPProxy(ContextStoreInterface):
     def save(self, mini_file):
         res = requests.post(self.rest_endpoint, json=mini_file.to_dict())
         if res.status_code is not 200:
-            raise IOError('Impossible to store object')
+            raise IOError('Impossible to store file')
 
     def load(self, file_id):
         res = requests.get(self.rest_endpoint + '/%s' % file_id)
         if res.status_code is not 200:
-            raise IOError('Impossible to load the object')
+            raise IOError('Impossible to load the file')
         return Minifile().from_dict(res.json())
 
     def delete(self, file_id):
@@ -50,7 +50,7 @@ class ContextStoreHTTPProxy(ContextStoreInterface):
             raise IOError('Impossible to delete the file')
 
     def list(self):
-        res = requests.get(self.rest_endpoint + '/%s' % file_id)
+        res = requests.get(self.rest_endpoint)
         if res.status_code is not 200:
             raise IOError('Impossible to load the object')
         return [Minifile().from_dict(x) for x in res.json()]

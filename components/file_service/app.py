@@ -5,9 +5,9 @@ from werkzeug.exceptions import BadRequest, NotFound, HTTPException, default_exc
 from file_storage.FileStorage import FileStorage, Minifile
 from file_storage.MemoryStorage import ObjectStoreInMemory, ContextStoreInMemory
 from file_storage.CassandraStorage import ObjectStoreCassandra, ContextStoreCassandra
-from file_storage.HTTPProxyStorage import ObjectStoreHTTPProxy
+from file_storage.HTTPProxyStorage import ObjectStoreHTTPProxy, ContextStoreHTTPProxy
 import config
-import json
+
 
 app = Flask(__name__)
 
@@ -26,7 +26,7 @@ def create_local_cassandra_file_storage():
 
 
 def create_remote_file_storate():
-    return FileStorage(ContextStoreInMemory(),
+    return FileStorage(ContextStoreHTTPProxy(config.MINIFILEBOX_CONTEXTSTORE_ENDPOINT),
                        ObjectStoreHTTPProxy(config.MINIFILEBOX_OBJECTSTORE_ENDPOINT))
 
 

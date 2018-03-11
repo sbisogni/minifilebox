@@ -29,7 +29,6 @@ def delete_context(file_id):
 
 @app.route(config.MINIFILEBOX_BASE_URI + '/context', methods=['GET'])
 def list_context():
-    print("Context Context: %s" % context_store.list())
     return jsonify([c.to_dict() for c in context_store.list()])
 
 
