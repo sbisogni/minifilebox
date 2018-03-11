@@ -1,0 +1,9 @@
+cassandra-driver==3.13.0
+click==6.7
+-e git+git@github.com:sbisogni/minifilebox.git@029abb47ca82ec82ae1b56e1fa0204002a342288#egg=file_storage&subdirectory=file_storage
+Flask==0.12.2
+itsdangerous==0.24
+Jinja2==2.10
+MarkupSafe==1.0
+six==1.11.0
+Werkzeug==0.14.1
