@@ -26,8 +26,17 @@ def create_local_cassandra_file_storage():
 
 
 def create_remote_file_storate():
-    return FileStorage(ContextStoreHTTPProxy(config.MINIFILEBOX_CONTEXTSTORE_ENDPOINT),
-                       ObjectStoreHTTPProxy(config.MINIFILEBOX_OBJECTSTORE_ENDPOINT))
+    contextstore_url = 'http://%s:%s%s/context' % (config.MINIFILEBOX_CONTEXTSTORE_HOST,
+                                                    config.MINIFILEBOX_CONTEXTSTORE_PORT,
+                                                    config.MINIFILEBOX_BASE_URI)
+    objectstore_url = 'http://%s:%s%s/objects' % (config.MINIFILEBOX_OBJECTSTORE_HOST,
+                                                   config.MINIFILEBOX_OBJECTSTORE_PORT,
+                                                   config.MINIFILEBOX_BASE_URI)
+
+    print("ContextStore URI %s" % contextstore_url)
+    print("ObjectStore URI %s" % objectstore_url)
+
+    return FileStorage(ContextStoreHTTPProxy(contextstore_url), ObjectStoreHTTPProxy(objectstore_url))
 
 
 file_storage_factory = {

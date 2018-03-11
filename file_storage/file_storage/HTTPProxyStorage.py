@@ -52,5 +52,5 @@ class ContextStoreHTTPProxy(ContextStoreInterface):
     def list(self):
         res = requests.get(self.rest_endpoint)
         if res.status_code is not 200:
-            raise IOError('Impossible to load the object')
+            raise IOError('Impossible to list files')
         return [Minifile().from_dict(x) for x in res.json()]
