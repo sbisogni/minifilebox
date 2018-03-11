@@ -1,14 +1,31 @@
 version: '3'
 services:
+###############################
+  file_service:
+    build: ./components/file_service
+    container_name: minifilebox_file_service
+    ports:
+      - 5000
+    depends_on:
+      - contextstore_service
+      - objectstore_service
+    environment:
+      - MINIFILEBOX_CONTEXTSTORE_ENDPOINT=http://contextstore_service:5002/context/
+      - MINIFILEBOX_OBJECTSTORE_ENDPOINT=http://objectstore_service:5001/objects/
 
 ###############################
-file_service:
-  build: ./components/file_service
-  container_name: minifilebox_file_service
-  ports:
-    - 5000
-  environment:
-    -
+  objectstore_service:
+    build: ./components/objectstore_service
+    container_name: minifilebox_objectstore_service
+    ports:
+      - 5001
+
+###############################
+  contextstore_service:
+    build: ./components/contextstore_service
+    container_name: minifilebox_contextstore_service
+    ports:
+      - 5002
 
 ###############################
 # cassandra0:
