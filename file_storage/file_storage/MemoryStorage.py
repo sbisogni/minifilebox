@@ -5,6 +5,7 @@ This classes are aimed for testing
 from file_storage.StorageInterface import ObjectStoreInterface, ContextStoreInterface
 from file_storage.KeyValue import KeyValue
 from file_storage.Minifile import Minifile
+import json
 
 
 class ObjectStoreInMemory(ObjectStoreInterface):
@@ -28,13 +29,13 @@ class ContextStoreInMemory(ContextStoreInterface):
         self._memory_db = {}
 
     def save(self, mini_file):
-        self._memory_db[mini_file.file_id] = mini_file.to_json()
+        self._memory_db[mini_file.file_id] = json.dumps(mini_file.to_dict(), sort_keys=True)
 
     def load(self, file_id):
-        return Minifile().from_json(self._memory_db[file_id])
+        return Minifile().from_dict(json.loads(self._memory_db[file_id]))
 
     def delete(self, file_id):
         self._memory_db.pop(file_id)
 
     def list(self):
-        return [Minifile().from_json(obj) for obj in self._memory_db.values()]
+        return [Minifile().from_dict(json.loads(obj)) for obj in self._memory_db.values()]

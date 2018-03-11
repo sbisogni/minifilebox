@@ -46,10 +46,10 @@ class ContextStoreInMemoryTestCase(unittest.TestCase):
         self.assertRaises(KeyError, self.context_store.load, exp_file.file_id)
 
     def testListReturnsAllFiles(self):
-        exp_list = [ Minifile(file_id='1', file_name='name'),
-                     Minifile(file_id='2', file_name='name'),
-                     Minifile(file_id='3', file_name='name'),
-                     Minifile(file_id='4', file_name='name')]
+        exp_list = [Minifile(file_id='1', file_name='name'),
+                    Minifile(file_id='2', file_name='name'),
+                    Minifile(file_id='3', file_name='name'),
+                    Minifile(file_id='4', file_name='name')]
 
         for file in exp_list:
             self.context_store.save(file)

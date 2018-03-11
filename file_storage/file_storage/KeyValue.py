@@ -1,7 +1,6 @@
 """
 Model a KeyValue object to be stored inside the ObjectStore
 """
-import json
 import base64
 
 
@@ -16,7 +15,11 @@ class KeyValue:
         self.key = key
         self.value = value
 
-    def to_json(self):
+    def to_dict(self):
+        """
+        Converts the KeyValue into an Dict
+        :return: Dict
+        """
         data = dict()
 
         if self.key:
@@ -25,10 +28,14 @@ class KeyValue:
         if self.value:
             data['value'] = base64.encodebytes(self.value).decode()
 
-        return json.dumps(data, sort_keys=True)
+        return data
 
-    def from_json(self, s):
-        data = json.loads(s)
+    def from_dict(self, data):
+        """
+        Initialize the KeyValue with given data Dict
+        :param data: Initialization dictionary
+        :return: self
+        """
         if 'key' in data:
             self.key = data['key']
         if 'value' in data:
@@ -37,4 +44,8 @@ class KeyValue:
         return self
 
     def __eq__(self, other):
-        return self.to_json() == other.to_json()
+        return (self.key == other.key) and \
+               (self.value == other.value)
+
+    def __str__(self):
+        return str(self.to_dict())

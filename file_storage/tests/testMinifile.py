@@ -1,15 +1,14 @@
 import unittest
-import json
 
 from file_storage.Minifile import Minifile
 
 
 class MinifileTestCase(unittest.TestCase):
 
-    def testMinifileToJsonWhenNoFields(self):
-        self.assertEqual('{}', Minifile().to_json())
+    def testMinifileToDictWhenNoFields(self):
+        self.assertEqual({}, Minifile().to_dict())
 
-    def testMinifileToJson(self):
+    def testMinifileToDict(self):
         minifile = Minifile(file_id='1',
                             file_name='name',
                             chunk_ids=['1', '2', '3'],
@@ -22,7 +21,7 @@ class MinifileTestCase(unittest.TestCase):
             'chunk_ids': minifile.chunk_ids
         }
 
-        self.assertEqual(json.dumps(d, sort_keys=True), minifile.to_json())
+        self.assertEqual(d, minifile.to_dict())
 
     def testMifileFromJson(self):
         exp_file = Minifile(file_id='1',
@@ -30,6 +29,6 @@ class MinifileTestCase(unittest.TestCase):
                             chunk_ids=['1', '2', '3'],
                             chunk_size=10)
 
-        json_obj = exp_file.to_json()
+        ext_dict = exp_file.to_dict()
 
-        self.assertEqual(exp_file, Minifile().from_json(json_obj))
+        self.assertEqual(exp_file, Minifile().from_dict(ext_dict))

@@ -34,7 +34,7 @@ class FileStorageTestCase(unittest.TestCase):
         self.storage._load = disable_internal_load
         exp_file = Minifile(file_id="id")
 
-        self.context_store_mock.load.return_value = exp_file.to_json()
+        self.context_store_mock.load.return_value = exp_file
         self.storage.load(exp_file.file_id)
 
         self.context_store_mock.load.assert_has_calls([call(exp_file.file_id)])
@@ -59,8 +59,7 @@ class FileStorageTestCase(unittest.TestCase):
 
         self.storage._delete = disable_internal_delete
         exp_file = Minifile(file_id="id")
-        self.context_store_mock.load.return_value = exp_file.to_json()
-
+        self.context_store_mock.load.return_value = exp_file
         self.storage.delete(exp_file.file_id)
 
         self.context_store_mock.load.assert_has_calls([call(exp_file.file_id)])
@@ -94,7 +93,7 @@ class FileStorageTestCase(unittest.TestCase):
     def testListCallsContextStoreToListFiles(self):
         exp_list = [Minifile(file_id="1"),
                     Minifile(file_id="2")]
-        self.context_store_mock.list.return_value = [Minifile().from_json(obj.to_json()) for obj in exp_list]
+        self.context_store_mock.list.return_value = exp_list
 
         self.storage.list()
 
@@ -103,7 +102,7 @@ class FileStorageTestCase(unittest.TestCase):
     def testListReturnsListOfFiles(self):
         exp_list = [Minifile(file_id="1"),
                     Minifile(file_id="2")]
-        self.context_store_mock.list.return_value = [Minifile().from_json(obj.to_json()) for obj in exp_list]
+        self.context_store_mock.list.return_value = exp_list
 
         act_list = self.storage.list()
 

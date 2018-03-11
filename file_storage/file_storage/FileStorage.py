@@ -59,7 +59,7 @@ class FileStorage:
         minifile.file_id = FileStorage.generate_file_id(minifile)
         self._save(minifile)
 
-        logging.info('saving in context store minifile = %s' % minifile.to_json())
+        logging.info('saving in context store minifile = %s' % minifile)
         self._context_store.save(minifile)
 
         logging.info('file storage save done - file_name = %s, file_id = %s' % (minifile.file_name, minifile.file_id))
@@ -113,7 +113,6 @@ class FileStorage:
                 minifile.chunk_ids.append(obj_id)
             else:
                 break
-
 
     def _load(self, minifile):
         if not minifile.chunk_ids:

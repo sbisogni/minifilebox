@@ -22,7 +22,7 @@ class Minifile:
         self.chunk_size = chunk_size
         self.chunk_ids = chunk_ids if chunk_ids is not None else []
 
-    def to_json(self):
+    def to_dict(self):
         data = dict()
 
         if self.file_name:
@@ -37,10 +37,9 @@ class Minifile:
         if self.chunk_ids:
             data['chunk_ids'] = self.chunk_ids
 
-        return json.dumps(data, sort_keys=True)
+        return data
 
-    def from_json(self, s):
-        data = json.loads(s)
+    def from_dict(self, data):
         if 'file_name' in data:
             self.file_name = data['file_name']
         if 'file_id' in data:
@@ -53,4 +52,7 @@ class Minifile:
         return self
 
     def __eq__(self, other):
-        return self.to_json() == other.to_json()
+        return (self.file_id == other.file_id) and \
+               (self.file_name == other.file_name) and \
+               (self.chunk_size == other.chunk_size) and \
+               (self.chunk_ids == other.chunk_ids)
