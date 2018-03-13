@@ -5,6 +5,9 @@ from cassandra.cqlengine import columns
 from cassandra.cqlengine import connection
 from cassandra.cqlengine.models import Model
 from cassandra.cqlengine.management import sync_table, create_keyspace_simple
+from file_storage.KeyValue import KeyValue
+from file_storage.Minifile import Minifile
+import json
 
 
 class ObjectKeyValue(Model):
@@ -24,11 +27,11 @@ class ObjectStoreCassandra:
         create_keyspace_simple(key_space, 1)
         sync_table(ObjectKeyValue)
 
-    def save(self, key, value):
-        ObjectKeyValue.create(key=key, value=value)
+    def save(self, obj):
+        ObjectKeyValue.create(key=obj.key, value=obj.value)
 
     def load(self, key):
-        return ObjectKeyValue.get(key=key).value
+        return KeyValue(key, ObjectKeyValue.get(key=key).value)
 
     def delete(self, key):
         ObjectKeyValue(key=key).delete()
@@ -41,14 +44,14 @@ class ContextStoreCassandra:
         create_keyspace_simple(key_space, 1)
         sync_table(ContextKeyValue)
 
-    def save(self, key, value):
-        ContextKeyValue.create(key=key, value=value)
+    def save(self, mini_file:Minifile):
+        ContextKeyValue.create(kmini_file.file_id, json.dumps(mini_file.to_dict(), sort_keys=True))
 
-    def load(self, key):
-        return ContextKeyValue.get(key=key).value
+    def load(self, file_id):
+        return Minifile().from_dict(json.loads(ContextKeyValue.get(file_id).value))
 
-    def delete(self, key):
-        ContextKeyValue(key=key).delete()
+    def delete(self, file_id):
+        ContextKeyValue(key=file_id).delete()
 
     def list(self):
-        return [x.value for x in ContextKeyValue.objects().all()]
+        return [Minifile().from_dict(json.loads(obj.value)) for obj in ContextKeyValue.objects().all()]

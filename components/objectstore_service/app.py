@@ -2,12 +2,19 @@
 
 from flask import Flask, request, jsonify
 from file_storage.MemoryStorage import ObjectStoreInMemory, KeyValue
+from file_storage.CassandraStorage import ObjectStoreCassandra
 import config
-import json
+
 
 app = Flask(__name__)
 
-object_store = ObjectStoreInMemory()
+object_store_factory = {
+    'memory': lambda: ObjectStoreInMemory(),
+    'cassandra': lambda: ObjectStoreCassandra(config.MINIFILEBOX_OBJ_STORE_CASSANDRA_KEYSPACE,
+                                              config.MINIFILEBOX_OBJ_STORE_CASSANDRA_NODES)
+}
+
+object_store = object_store_factory[config.MINIFILEBOX_STORAGE_TYPE]()
 
 
 @app.route(config.MINIFILEBOX_BASE_URI + '/objects', methods=['POST'])
