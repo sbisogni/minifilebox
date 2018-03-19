@@ -24,7 +24,7 @@ class ObjectStoreCassandra:
 
     def __init__(self, key_space, cluster_nodes):
         connection.setup(cluster_nodes, key_space)
-        create_keyspace_simple(key_space, 1)
+        create_keyspace_simple(key_space, 3)
         sync_table(ObjectKeyValue)
 
     def save(self, obj):
@@ -41,14 +41,14 @@ class ContextStoreCassandra:
 
     def __init__(self, key_space, cluster_nodes):
         connection.setup(cluster_nodes, key_space)
-        create_keyspace_simple(key_space, 1)
+        create_keyspace_simple(key_space, 3)
         sync_table(ContextKeyValue)
 
-    def save(self, mini_file:Minifile):
-        ContextKeyValue.create(kmini_file.file_id, json.dumps(mini_file.to_dict(), sort_keys=True))
+    def save(self, mini_file):
+        ContextKeyValue.create(key=mini_file.file_id, value=json.dumps(mini_file.to_dict(), sort_keys=True))
 
     def load(self, file_id):
-        return Minifile().from_dict(json.loads(ContextKeyValue.get(file_id).value))
+        return Minifile().from_dict(json.loads(ContextKeyValue.get(key=file_id).value))
 
     def delete(self, file_id):
         ContextKeyValue(key=file_id).delete()
