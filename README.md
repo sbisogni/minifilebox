@@ -66,17 +66,6 @@ Minifilebox exports REST endpoints to perform operations
         *MINIFILEBOX_STORAGE_TYPE*: Specify the FileStorage layout. Valid value are: *memory* (local memory db), *cassandra* (local cassandra db), *remote* (remote storage)   
  
     * **storage_service** application provides the rest endpoints for remote Object and Context storage (*Not implemented yet*)
-
-# Current Status
-
-Here a summary of the current implementation respect to proposed final architecture. 
-
- **The current status does not match the avaibility and scalability requirements**
- 
-Currently the file_service is working only the the test memory DB. Using this configuration the core Minfilebox functionaliries are implemented.
-Currently working on integrating Cassandra but many integration issues so far. As well report Storage endpoints to be implemented.
-Once those components will be implemented, thanks to the implementation design, it will be possible to plug them trasparently without just setting the MINIFILEBOX_STORAGE_TYPE parameter. 
-Once the Cassandra storage and the HTTP Storage endpoints will be implemented then it will be possible to run each service into separate docker containers and operate them inside Kubernetes so to grant continous availabilty and horizontal scaling
  
 # Deployment
 
