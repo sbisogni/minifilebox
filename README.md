@@ -49,7 +49,7 @@ Minifilebox exports REST endpoints to perform operations
 
 * **file_storage**: it is provide the core functionalities for handling the files inside the system, splitting them and managing the associated metadata.
     
-    * **[FileStorage.py](https://github.com/sbisogni/minifilebox/blob/master/file_storage/file_storage/FileStorage.py)** class implements the core logic. It calls the ObjectStore interface to store files chunks and with the ContextInterface for storing file metadata (Minifile)
+    * **[FileStorage](https://github.com/sbisogni/minifilebox/blob/master/file_storage/file_storage/FileStorage.py)** class implements the core logic. It calls the ObjectStore interface to store files chunks and with the ContextInterface for storing file metadata (Minifile)
     * **[ObjectStoreInterface](https://github.com/sbisogni/minifilebox/blob/master/file_storage/file_storage/StorageInterface.py)** class provides the methods to interact with the chunks storage
     * **[ContextStoreInterface](https://github.com/sbisogni/minifilebox/blob/master/file_storage/file_storage/StorageInterface.py)** class provides the methods to interact with the Minifile storage
     * **[MemoryStorage](https://github.com/sbisogni/minifilebox/blob/master/file_storage/file_storage/MemoryStorage.py)** module provides the implementation of the StorageInterface when using a simple memory DB. Aimed for testing
@@ -60,13 +60,10 @@ Minifilebox exports REST endpoints to perform operations
   
 * **components**: here is where are located the different applications which will run inside dedicated Docker containers
 
-    * **[file_service](https://github.com/sbisogni/minifilebox/blob/master/components/file_service/app.py)** application provides the rest endpoints to interact with the Minifilebox system. Check the [config.py](https://github.com/sbisogni/minifilebox/blob/master/components/file_service/config.py) to see configuration options. 
-        
-        *MINIFILEBOX_CHUNK_SIZE*: Default chunk size
-        *MINIFILEBOX_STORAGE_TYPE*: Specify the FileStorage layout. Valid value are: *memory* (local memory db), *cassandra* (local cassandra db), *remote* (remote storage)   
- 
-    * **storage_service** application provides the rest endpoints for remote Object and Context storage (*Not implemented yet*)
- 
+    * **[file_service](https://github.com/sbisogni/minifilebox/blob/master/components/file_service)** application provides the rest endpoints to interact with the Minifilebox system. Check the [config.py](https://github.com/sbisogni/minifilebox/blob/master/components/file_service/config.py) to see configuration options. 
+    * **[contextstore_service](https://github.com/sbisogni/minifilebox/tree/master/components/contextstore_service)** the file metadata storage. Check the [config.py](https://github.com/sbisogni/minifilebox/blob/master/components/objectstore_service/config.py) to see configuration options.
+    * **[objectstore_service](https://github.com/sbisogni/minifilebox/tree/master/components/objectstore_service)** the chunk storage. Check the [config.py](https://github.com/sbisogni/minifilebox/blob/master/components/contextstore_service/config.py) to see configuration options. 
+    
 # Deployment
 
 * Requirements
@@ -76,9 +73,9 @@ Minifilebox exports REST endpoints to perform operations
   This is the only requirement if you want to run the application. Docker will take care to all the rest.
   To run the unittest and integration test the following are also required:
   
-  * python 3: https://www.python.org/download/releases/3.0/
-  * pip3: https://pypi.python.org/pypi/pip
-  * virtualenv: https://virtualenv.pypa.io/en/stable/ (optional, if you do not want to mess with your python env)
+  * [python 3](https://www.python.org/download/releases/3.0/)
+  * [pip3](https://pypi.python.org/pypi/pip)
+  * [virtualenv](https://virtualenv.pypa.io/en/stable/) (optional, if you do not want to mess with your python env)
   
 * How To Run Minifilebox
 
