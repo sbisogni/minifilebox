@@ -2,11 +2,19 @@
 
 from flask import Flask, request, jsonify
 from file_storage.MemoryStorage import ContextStoreInMemory, Minifile
+from file_storage.CassandraStorage import ContextStoreCassandra
 import config
 
 app = Flask(__name__)
 
-context_store = ContextStoreInMemory()
+
+context_store_factory = {
+    'memory': lambda: ContextStoreInMemory(),
+    'cassandra': lambda: ContextStoreCassandra(config.MINIFILEBOX_CTX_STORE_CASSANDRA_KEYSPACE,
+                                               config.MINIFILEBOX_CTX_STORE_CASSANDRA_NODES)
+}
+
+context_store = context_store_factory[config.MINIFILEBOX_STORAGE_TYPE]()
 
 
 @app.route(config.MINIFILEBOX_BASE_URI + '/context', methods=['POST'])

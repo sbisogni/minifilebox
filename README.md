@@ -70,7 +70,8 @@ Minifilebox exports REST endpoints to perform operations
 # Deployment
 
 * Requirements
-  * docker: https://www.docker.com/
+  * [docker](https://www.docker.com/)
+  * [docker-compose](https://docs.docker.com/compose/)
   
   This is the only requirement if you want to run the application. Docker will take care to all the rest.
   To run the unittest and integration test the following are also required:
@@ -109,5 +110,4 @@ For unittest run
 For integration tests run
 
         ./bin/run_integration_tests.sh
- 
-                
+

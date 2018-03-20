@@ -20,7 +20,6 @@ def upload_file(file_name):
     assert response.status_code == 200
 
     minifile = Minifile().from_dict(response.json())
-    #print("UPLOAD FILE %s - %s" % (file_name, minifile.to_json()))
 
     assert minifile.file_id
     assert minifile.file_name == file_name
@@ -39,7 +38,6 @@ def download_file(file_id, new_file_name):
     assert response.status_code == 200
 
     open(new_file_name, 'wb').write(response.content)
-    #print("DOWNLOADED FILE %s" % file_id)
 
 
 def delete_file(file_id):
@@ -53,7 +51,6 @@ def delete_file(file_id):
     assert response.status_code == 200
 
     minifile = Minifile().from_dict(response.json())
-    #print('DELETE FILE %s - %s' % (file_id, minifile.to_json()))
 
     return minifile
 
@@ -64,13 +61,11 @@ def list_files():
     }
 
     response = requests.request("GET", based_uri, headers=headers)
-    #print(response.json())
 
     # Validating response
     assert response.status_code == 200
 
     l = response.json()
-    #print('LIST FILE: %s' % l)
     return [Minifile().from_dict(s) for s in l]
 
 

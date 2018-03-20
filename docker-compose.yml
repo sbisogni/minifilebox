@@ -30,6 +30,13 @@ services:
     build: ./components/contextstore_service
     ports:
       - 5002:5002
+    command: sh -c './wait-for -t 60 cassandra0:9042 -- python3 ./app.py'
+    depends_on:
+      - cassandra0
+      - cassandra1
+      - cassandra2
+    environment:
+      - MINIFILEBOX_CASSANDRA_NODES=cassandra0
 
 ###############################
   cassandra0:

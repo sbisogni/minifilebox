@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='file_storage',
-    version='0.2',
+    version='0.3',
     description='MinifileBox File Storage',
     url='https://github.com/sbisogni/minifilebox',
     author='Simone Bisogni',
