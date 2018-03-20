@@ -1,8 +1,8 @@
 # Minifilebox
 A simple dropbox-like solution.
 
-Minifilebox allows to handle upload, download, delete, list files.
-When a fine is uploaded, it is splitted in chunks of configurable size which are store in distributed, replicated DB.
+Minifilebox allows to upload, download, delete, list files.
+When a fine is uploaded, it is split in chunks of configurable size which are store in distributed, replicated storage.
 
 Minifilebox exports REST endpoints to perform operations
 
