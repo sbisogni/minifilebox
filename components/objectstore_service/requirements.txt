@@ -1,5 +1,5 @@
 cassandra-driver==3.13.0
-certifi==2018.1.18
+certifi==2022.12.7
 chardet==3.0.4
 click==6.7
 -e git+https://github.com/sbisogni/minifilebox.git@8fa40ab82bf310ac9fb12a225cc6c6fc8bfe9b25#egg=file_storage&subdirectory=file_storage
